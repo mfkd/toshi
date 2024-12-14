@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"strconv"
 
 	"github.com/gocolly/colly/v2"
 )
@@ -56,8 +57,14 @@ func fetchBooks(term string) ([]Book, error) {
 
 	// Handle book rows
 	c.OnHTML("tr[valign=top]", func(e *colly.HTMLElement) {
+		id := e.ChildText("td:nth-child(1)")
+		if _, err := strconv.Atoi(id); err != nil {
+			// Skip rows where ID is not numeric (likely header)
+			return
+		}
+
 		book := Book{
-			ID:        e.ChildText("td:nth-child(1)"),
+			ID:        id,
 			Authors:   e.ChildText("td:nth-child(2)"),
 			Title:     e.ChildText("td:nth-child(3)"),
 			Publisher: e.ChildText("td:nth-child(4)"),
