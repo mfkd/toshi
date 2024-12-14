@@ -64,13 +64,8 @@ func extractTitleAndISBN(input string) (string, []string) {
 	return title, isbns
 }
 
-func fetchBooks(term string) ([]Book, error) {
+func fetchBooks(c *colly.Collector, term string) ([]Book, error) {
 	var books []Book
-
-	// Create a Colly collector
-	c := colly.NewCollector(
-		colly.AllowedDomains("libgen.is", "libgen.rs"),
-	)
 
 	// Set headers
 	c.OnRequest(func(r *colly.Request) {
@@ -146,7 +141,12 @@ func main() {
 
 	searchTerm := parseArgs()
 
-	books, err := fetchBooks(searchTerm)
+	// Create a Colly collector
+	c := colly.NewCollector(
+		colly.AllowedDomains("libgen.is", "libgen.rs"),
+	)
+
+	books, err := fetchBooks(c, searchTerm)
 	if err != nil {
 		log.Fatalf("Error fetching books: %v", err)
 	}
