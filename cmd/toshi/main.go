@@ -38,6 +38,29 @@ func setupCollector() *colly.Collector {
 	return c
 }
 
+// processBooks handles the user selection, fetches download links, and attempts to download the selected book.
+func processBooks(c *colly.Collector, books []libgen.Book) {
+	// Allow the user to select a book from the filtered list (e.g., EPUB books)
+	selectedBook := ui.SelectBook(libgen.FilterEPUB(books))
+	if selectedBook == nil {
+		log.Println("No book selected.")
+		return
+	}
+
+	fmt.Printf("Selected Book: %s\n", selectedBook.Title)
+
+	// Fetch download links for the selected book
+	downloadLinks := libgen.FetchDownloadLinks(c, *selectedBook)
+
+	// Attempt to download the file
+	fileName := libgen.FileName(*selectedBook)
+	if err := libgen.TryDownloadLinks(c, downloadLinks, fileName); err != nil {
+		log.Printf("Failed to download file for book %s: %v", selectedBook.Title, err)
+	} else {
+		fmt.Printf("Book downloaded successfully as %s\n", fileName)
+	}
+}
+
 func main() {
 
 	c := setupCollector()
@@ -49,11 +72,5 @@ func main() {
 		log.Fatalf("Error fetching books: %v", err)
 	}
 
-	selectedBook := ui.SelectBook(libgen.FilterEPUB(books))
-	fmt.Println(selectedBook)
-
-	downloadLinks := libgen.FetchDownloadLinks(c, *selectedBook)
-	if err := libgen.TryDownloadLinks(c, downloadLinks, libgen.FileName(books[0])); err != nil {
-		log.Printf("Failed to download file for book %s: %v", books[0].Title, err)
-	}
+	processBooks(c, books)
 }
