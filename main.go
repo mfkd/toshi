@@ -32,7 +32,7 @@ type Book struct {
 const libgenSearchBaseURL = "https://libgen.is/search.php"
 
 // Helper function to construct the search URL on TITLE Column
-func constructTitleSearchURL(term string) string {
+func titleSearchURL(term string) string {
 	params := url.Values{}
 	params.Add("req", term)
 	params.Add("column", "title")
@@ -40,7 +40,7 @@ func constructTitleSearchURL(term string) string {
 }
 
 // Helper function to construct the search URL on ALL Column
-func constructDefaultSearchURL(term string) string {
+func defaultSearchURL(term string) string {
 	params := url.Values{}
 	params.Add("req", term)
 	params.Add("column", "def")
@@ -113,7 +113,7 @@ func fetchBooks(term string) ([]Book, error) {
 	})
 
 	// Construct the search URL using the helper function
-	searchURL := constructDefaultSearchURL(term)
+	searchURL := defaultSearchURL(term)
 
 	// Visit the search page
 	err := c.Visit(searchURL)
