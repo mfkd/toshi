@@ -1,0 +1,14 @@
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Build directories
+/bin/
+/obj/
+/vendor/
+
+# IDE configs
+.vscode/
+.idea/
