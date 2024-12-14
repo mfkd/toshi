@@ -96,7 +96,8 @@ func fetchDownloadLinks(c *colly.Collector, b Book) []string {
 	var downloadLinks []string
 	c.OnHTML("div#download ul li a[href]", func(e *colly.HTMLElement) {
 		href := e.Attr("href")
-		if strings.Contains(href, "gateway.ipfs.io") {
+		// gateway.ipfs.io seems to be the only working link
+		if strings.Contains(href, "."+strings.TrimSpace(b.Extension)) {
 			downloadLinks = append(downloadLinks, href)
 		}
 	})
@@ -148,37 +149,36 @@ func parseArgs() string {
 
 	// Ensure the positional argument "searchterm" is provided
 	if len(args) < 1 {
-		fmt.Println("Usage: toshi searchterm")
-		fmt.Println("Example: toshi \"deep utopia\"")
+		log.Println("Usage: toshi searchterm")
+		log.Println("Example: toshi \"deep utopia\"")
 		os.Exit(1)
 	}
 
 	return args[0]
 }
 
-func downloadFile(c *colly.Collector, fileURL, savePath string) error {
-	// Set up the OnResponse callback to save the file content
+func setupCollector(c *colly.Collector, savePath string) {
 	c.OnResponse(func(r *colly.Response) {
-		// Create the file in the current working directory
-		savePath := filepath.Join(".", savePath)
-		file, err := os.Create(savePath)
+		// Save the file content
+		saveFilePath := filepath.Join(".", savePath)
+		file, err := os.Create(saveFilePath)
 		if err != nil {
 			log.Printf("Failed to create file: %v", err)
 			return
 		}
 		defer file.Close()
 
-		// Write the response body to the file
-		reader := bytes.NewReader(r.Body)
-		_, err = io.Copy(file, reader)
+		_, err = io.Copy(file, bytes.NewReader(r.Body))
 		if err != nil {
 			log.Printf("Failed to write to file: %v", err)
 			return
 		}
 
-		log.Printf("File successfully downloaded to: %s", savePath)
+		log.Printf("File successfully downloaded to: %s", saveFilePath)
 	})
+}
 
+func downloadFile(c *colly.Collector, fileURL, savePath string) error {
 	// Visit the file URL
 	err := c.Visit(fileURL)
 	if err != nil {
@@ -187,6 +187,19 @@ func downloadFile(c *colly.Collector, fileURL, savePath string) error {
 	}
 
 	return nil
+}
+
+func tryDownloadLinks(c *colly.Collector, downloadLinks []string, savePath string) error {
+	setupCollector(c, savePath)
+	var err error
+	for _, link := range downloadLinks {
+		if err = downloadFile(c, link, savePath); err == nil {
+			// Download successful
+			log.Printf("Successfully downloaded file from link: %s\n", link)
+			break
+		}
+	}
+	return err
 }
 
 func main() {
@@ -212,8 +225,8 @@ func main() {
 	}
 
 	downloadLinks := fetchDownloadLinks(c, books[0])
-	if err := downloadFile(c, downloadLinks[0], fileName(books[0])); err != nil {
-
+	if err := tryDownloadLinks(c, downloadLinks, fileName(books[0])); err != nil {
+		log.Printf("Failed to download file for book %s: %v", books[0].Title, err)
 	}
 }
 
