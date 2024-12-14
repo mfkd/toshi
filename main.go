@@ -67,11 +67,6 @@ func extractTitleAndISBN(input string) (string, []string) {
 func fetchBooks(c *colly.Collector, term string) ([]Book, error) {
 	var books []Book
 
-	// Set headers
-	c.OnRequest(func(r *colly.Request) {
-		r.Headers.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36")
-	})
-
 	// Handle book rows
 	c.OnHTML("tr[valign=top]", func(e *colly.HTMLElement) {
 		searchHandler(e, &books)
@@ -145,6 +140,11 @@ func main() {
 	c := colly.NewCollector(
 		colly.AllowedDomains("libgen.is", "libgen.rs"),
 	)
+
+	// Set headers
+	c.OnRequest(func(r *colly.Request) {
+		r.Headers.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36")
+	})
 
 	books, err := fetchBooks(c, searchTerm)
 	if err != nil {
