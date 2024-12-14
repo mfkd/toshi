@@ -17,6 +17,7 @@ func parseArgs() string {
 	args := flag.Args()
 
 	// Ensure the positional argument "searchterm" is provided
+	// TODO: Provide more informative output when user provides invalid input
 	if len(args) < 1 {
 		log.Println("Usage: toshi searchterm")
 		log.Println("Example: toshi \"deep utopia\"")
