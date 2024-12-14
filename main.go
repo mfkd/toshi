@@ -233,11 +233,6 @@ func main() {
 		log.Fatalf("Error fetching books: %v", err)
 	}
 
-	fmt.Printf("Found %d books:\n", len(books))
-	for _, book := range books {
-		fmt.Printf("%+v\n", book)
-	}
-
 	downloadLinks := fetchDownloadLinks(c, books[0])
 	if err := tryDownloadLinks(c, downloadLinks, fileName(books[0])); err != nil {
 		log.Printf("Failed to download file for book %s: %v", books[0].Title, err)
@@ -246,4 +241,14 @@ func main() {
 
 func fileName(b Book) string {
 	return fmt.Sprintf("%s.%s", strings.ReplaceAll(b.Title, " ", "_"), strings.TrimSpace(b.Extension))
+}
+
+func filterEPUB(books []Book) []Book {
+	var filteredBooks []Book
+	for _, b := range books {
+		if b.Extension == "epub" {
+			filteredBooks = append(filteredBooks, b)
+		}
+	}
+	return filteredBooks
 }
