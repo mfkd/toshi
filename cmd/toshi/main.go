@@ -26,10 +26,7 @@ func parseArgs() string {
 	return args[0]
 }
 
-func main() {
-
-	searchTerm := parseArgs()
-
+func setupCollector() *colly.Collector {
 	// Create a Colly collector
 	c := colly.NewCollector()
 
@@ -37,6 +34,15 @@ func main() {
 	c.OnRequest(func(r *colly.Request) {
 		r.Headers.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36")
 	})
+
+	return c
+}
+
+func main() {
+
+	c := setupCollector()
+
+	searchTerm := parseArgs()
 
 	books, err := libgen.FetchBooks(c, searchTerm)
 	if err != nil {
