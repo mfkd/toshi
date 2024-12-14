@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -74,7 +77,7 @@ func fetchBooks(c *colly.Collector, term string) ([]Book, error) {
 
 	// Log errors with response details
 	c.OnError(func(r *colly.Response, err error) {
-		log.Printf("Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
+		log.Printf("Fetch Books Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
 	})
 
 	// Construct the search URL using the helper function
@@ -87,6 +90,27 @@ func fetchBooks(c *colly.Collector, term string) ([]Book, error) {
 	}
 
 	return books, nil
+}
+
+func fetchDownloadLinks(c *colly.Collector, b Book) []string {
+	var downloadLinks []string
+	c.OnHTML("div#download ul li a[href]", func(e *colly.HTMLElement) {
+		href := e.Attr("href")
+		if strings.Contains(href, "gateway.ipfs.io") {
+			downloadLinks = append(downloadLinks, href)
+		}
+	})
+
+	// Log errors with response details
+	c.OnError(func(r *colly.Response, err error) {
+		log.Printf("Download Links Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
+	})
+
+	err := c.Visit(b.Mirrors[0])
+	if err != nil {
+		log.Printf("Error visiting mirror link: %v", err)
+	}
+	return downloadLinks
 }
 
 func searchHandler(e *colly.HTMLElement, books *[]Book) {
@@ -132,14 +156,45 @@ func parseArgs() string {
 	return args[0]
 }
 
+func downloadFile(c *colly.Collector, fileURL, savePath string) error {
+	// Set up the OnResponse callback to save the file content
+	c.OnResponse(func(r *colly.Response) {
+		// Create the file in the current working directory
+		savePath := filepath.Join(".", savePath)
+		file, err := os.Create(savePath)
+		if err != nil {
+			log.Printf("Failed to create file: %v", err)
+			return
+		}
+		defer file.Close()
+
+		// Write the response body to the file
+		reader := bytes.NewReader(r.Body)
+		_, err = io.Copy(file, reader)
+		if err != nil {
+			log.Printf("Failed to write to file: %v", err)
+			return
+		}
+
+		log.Printf("File successfully downloaded to: %s", savePath)
+	})
+
+	// Visit the file URL
+	err := c.Visit(fileURL)
+	if err != nil {
+		log.Printf("Failed to visit file URL: %v", err)
+		return err
+	}
+
+	return nil
+}
+
 func main() {
 
 	searchTerm := parseArgs()
 
 	// Create a Colly collector
-	c := colly.NewCollector(
-		colly.AllowedDomains("libgen.is", "libgen.rs"),
-	)
+	c := colly.NewCollector()
 
 	// Set headers
 	c.OnRequest(func(r *colly.Request) {
@@ -155,4 +210,13 @@ func main() {
 	for _, book := range books {
 		fmt.Printf("%+v\n", book)
 	}
+
+	downloadLinks := fetchDownloadLinks(c, books[0])
+	if err := downloadFile(c, downloadLinks[0], fileName(books[0])); err != nil {
+
+	}
+}
+
+func fileName(b Book) string {
+	return fmt.Sprintf("%s.%s", strings.ReplaceAll(b.Title, " ", "_"), strings.TrimSpace(b.Extension))
 }
