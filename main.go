@@ -32,7 +32,10 @@ type Book struct {
 }
 
 // Base URL for the LibGen search
-const libgenSearchBaseURL = "https://libgen.is/search.php"
+const (
+	libgenSearchBaseURL = "https://libgen.is/search.php"
+	downloadDir         = "output"
+)
 
 // Helper function to construct the search URL on TITLE Column
 func titleSearchURL(term string) string {
@@ -93,6 +96,7 @@ func fetchBooks(c *colly.Collector, term string) ([]Book, error) {
 }
 
 func fetchDownloadLinks(c *colly.Collector, b Book) []string {
+	// We need to try fetch download links from all Mirrors not just index 0
 	var downloadLinks []string
 	c.OnHTML("div#download ul li a[href]", func(e *colly.HTMLElement) {
 		href := e.Attr("href")
@@ -157,11 +161,16 @@ func parseArgs() string {
 	return args[0]
 }
 
-func setupCollector(c *colly.Collector, savePath string) {
+func setupDownloadCollector(c *colly.Collector, filename string) error {
+	outputDir := downloadDir
+	if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
+	}
+
+	filePath := filepath.Join(outputDir, filename)
+
 	c.OnResponse(func(r *colly.Response) {
-		// Save the file content
-		saveFilePath := filepath.Join(".", savePath)
-		file, err := os.Create(saveFilePath)
+		file, err := os.Create(filePath)
 		if err != nil {
 			log.Printf("Failed to create file: %v", err)
 			return
@@ -174,32 +183,37 @@ func setupCollector(c *colly.Collector, savePath string) {
 			return
 		}
 
-		log.Printf("File successfully downloaded to: %s", saveFilePath)
+		log.Printf("File successfully downloaded to: %s", filePath)
 	})
-}
-
-func downloadFile(c *colly.Collector, fileURL, savePath string) error {
-	// Visit the file URL
-	err := c.Visit(fileURL)
-	if err != nil {
-		log.Printf("Failed to visit file URL: %v", err)
-		return err
-	}
 
 	return nil
 }
 
-func tryDownloadLinks(c *colly.Collector, downloadLinks []string, savePath string) error {
-	setupCollector(c, savePath)
+func tryDownloadLinks(c *colly.Collector, downloadLinks []string, filename string) error {
+	outputDir := downloadDir
+	savePath := filepath.Join(outputDir, filename)
+
+	if err := setupDownloadCollector(c, filename); err != nil {
+		return err
+	}
+
 	var err error
 	for _, link := range downloadLinks {
 		if err = downloadFile(c, link, savePath); err == nil {
-			// Download successful
 			log.Printf("Successfully downloaded file from link: %s\n", link)
 			break
 		}
 	}
 	return err
+}
+
+func downloadFile(c *colly.Collector, fileURL, savePath string) error {
+	err := c.Visit(fileURL)
+	if err != nil {
+		log.Printf("Failed to visit file URL: %v", err)
+		return err
+	}
+	return nil
 }
 
 func main() {

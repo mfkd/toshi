@@ -12,3 +12,6 @@
 # IDE configs
 .vscode/
 .idea/
+
+# Output directory for file downloads
+output/
