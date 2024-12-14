@@ -1,4 +1,4 @@
-module toshi
+module github.com/mfkd/toshi
 
 go 1.23.4
 
