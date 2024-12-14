@@ -46,6 +46,7 @@ func main() {
 	selectedBook := ui.SelectBook(libgen.FilterEPUB(books))
 	fmt.Println(selectedBook)
 
+	// TODO: Use selected book
 	downloadLinks := libgen.FetchDownloadLinks(c, books[0])
 	if err := libgen.TryDownloadLinks(c, downloadLinks, libgen.FileName(books[0])); err != nil {
 		log.Printf("Failed to download file for book %s: %v", books[0].Title, err)

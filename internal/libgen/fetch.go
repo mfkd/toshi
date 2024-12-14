@@ -9,6 +9,7 @@ import (
 )
 
 // Fetch a list of books based on the search term
+// TODO: Scrape all pages in response not just page 1.
 func FetchBooks(c *colly.Collector, term string) ([]Book, error) {
 	var books []Book
 

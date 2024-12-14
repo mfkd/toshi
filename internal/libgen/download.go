@@ -69,12 +69,13 @@ func downloadFile(c *colly.Collector, fileURL, savePath string) error {
 	return nil
 }
 
+// FetchDownloadLinks extracts valid download links for a book from its mirror pages using a Colly collector.
 func FetchDownloadLinks(c *colly.Collector, b Book) []string {
 	// We need to try fetch download links from all Mirrors not just index 0
 	var downloadLinks []string
 	c.OnHTML("div#download ul li a[href]", func(e *colly.HTMLElement) {
 		href := e.Attr("href")
-		// gateway.ipfs.io seems to be the only working link
+		// NOTE: gateway.ipfs.io seems to be the only working link
 		if strings.Contains(href, "."+strings.TrimSpace(b.Extension)) {
 			downloadLinks = append(downloadLinks, href)
 		}
@@ -85,6 +86,7 @@ func FetchDownloadLinks(c *colly.Collector, b Book) []string {
 		log.Printf("Download Links Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
 	})
 
+	// TODO: Fetch all mirror links not just index 0
 	err := c.Visit(b.Mirrors[0])
 	if err != nil {
 		log.Printf("Error visiting mirror link: %v", err)

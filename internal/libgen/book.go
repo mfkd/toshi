@@ -22,6 +22,8 @@ type Book struct {
 }
 
 // Extract title and ISBN numbers from a string
+// TODO: Consider a more robust ISBN regex and think about error handling
+// isbnRegex := regexp.MustCompile(`\b(?:\d{9}[\dX]|\d{13})\b`)
 func ExtractTitleAndISBN(input string) (string, []string) {
 
 	// Regular expression to match ISBN numbers
@@ -46,6 +48,7 @@ func FileName(b Book) string {
 }
 
 // Filter books to only include those with the "epub" extension
+// TODO: FilterEPUB could use a more generic filter function with a predicate, making it reusable for other extensions
 func FilterEPUB(books []Book) []Book {
 	var filteredBooks []Book
 	for _, b := range books {
