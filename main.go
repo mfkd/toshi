@@ -6,7 +6,9 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/gocolly/colly/v2"
 )
@@ -15,6 +17,7 @@ type Book struct {
 	ID        string
 	Authors   string
 	Title     string
+	ISBN      []string
 	Publisher string
 	Year      string
 	Pages     string
@@ -44,6 +47,23 @@ func constructDefaultSearchURL(term string) string {
 	return fmt.Sprintf("%s?%s", libgenSearchBaseURL, params.Encode())
 }
 
+func extractTitleAndISBN(input string) (string, []string) {
+	// Regular expression to match ISBN numbers
+	isbnRegex := regexp.MustCompile(`\b\d{9,13}\b`)
+
+	// Find all ISBN numbers
+	isbns := isbnRegex.FindAllString(input, -1)
+
+	// Remove ISBN numbers from the original string
+	title := isbnRegex.ReplaceAllString(input, "")
+
+	// Clean up the title (remove extra spaces and trailing commas)
+	title = strings.TrimSpace(title)
+	title = strings.TrimRight(title, ",")
+
+	return title, isbns
+}
+
 func fetchBooks(term string) ([]Book, error) {
 	var books []Book
 
@@ -65,10 +85,13 @@ func fetchBooks(term string) ([]Book, error) {
 			return
 		}
 
+		title, isbns := extractTitleAndISBN(e.ChildText("td:nth-child(3) a"))
+
 		book := Book{
 			ID:        id,
 			Authors:   e.ChildText("td:nth-child(2)"),
-			Title:     e.ChildText("td:nth-child(3)"),
+			Title:     title,
+			ISBN:      isbns,
 			Publisher: e.ChildText("td:nth-child(4)"),
 			Year:      e.ChildText("td:nth-child(5)"),
 			Pages:     e.ChildText("td:nth-child(6)"),
