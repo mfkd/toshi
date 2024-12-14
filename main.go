@@ -79,32 +79,7 @@ func fetchBooks(term string) ([]Book, error) {
 
 	// Handle book rows
 	c.OnHTML("tr[valign=top]", func(e *colly.HTMLElement) {
-		id := e.ChildText("td:nth-child(1)")
-		if _, err := strconv.Atoi(id); err != nil {
-			// Skip rows where ID is not numeric (likely header)
-			return
-		}
-
-		title, isbns := extractTitleAndISBN(e.ChildText("td:nth-child(3) a"))
-
-		book := Book{
-			ID:        id,
-			Authors:   e.ChildText("td:nth-child(2)"),
-			Title:     title,
-			ISBN:      isbns,
-			Publisher: e.ChildText("td:nth-child(4)"),
-			Year:      e.ChildText("td:nth-child(5)"),
-			Pages:     e.ChildText("td:nth-child(6)"),
-			Language:  e.ChildText("td:nth-child(7)"),
-			Size:      e.ChildText("td:nth-child(8)"),
-			Extension: e.ChildText("td:nth-child(9)"),
-			Mirrors: []string{
-				e.ChildAttr("td:nth-child(10) a:nth-child(1)", "href"),
-				e.ChildAttr("td:nth-child(11) a:nth-child(1)", "href"),
-			},
-			Edit: e.ChildAttr("td:nth-child(11) a", "href"),
-		}
-		books = append(books, book)
+		searchHandler(e, &books)
 	})
 
 	// Log errors with response details
@@ -122,6 +97,35 @@ func fetchBooks(term string) ([]Book, error) {
 	}
 
 	return books, nil
+}
+
+func searchHandler(e *colly.HTMLElement, books *[]Book) {
+	id := e.ChildText("td:nth-child(1)")
+	if _, err := strconv.Atoi(id); err != nil {
+		// Skip rows where ID is not numeric (likely header)
+		return
+	}
+
+	title, isbns := extractTitleAndISBN(e.ChildText("td:nth-child(3) a"))
+
+	book := Book{
+		ID:        id,
+		Authors:   e.ChildText("td:nth-child(2)"),
+		Title:     title,
+		ISBN:      isbns,
+		Publisher: e.ChildText("td:nth-child(4)"),
+		Year:      e.ChildText("td:nth-child(5)"),
+		Pages:     e.ChildText("td:nth-child(6)"),
+		Language:  e.ChildText("td:nth-child(7)"),
+		Size:      e.ChildText("td:nth-child(8)"),
+		Extension: e.ChildText("td:nth-child(9)"),
+		Mirrors: []string{
+			e.ChildAttr("td:nth-child(10) a:nth-child(1)", "href"),
+			e.ChildAttr("td:nth-child(11) a:nth-child(1)", "href"),
+		},
+		Edit: e.ChildAttr("td:nth-child(11) a", "href"),
+	}
+	*books = append(*books, book)
 }
 
 func main() {
