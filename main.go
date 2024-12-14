@@ -128,8 +128,7 @@ func searchHandler(e *colly.HTMLElement, books *[]Book) {
 	*books = append(*books, book)
 }
 
-func main() {
-
+func parseArgs() string {
 	flag.Parse()
 	args := flag.Args()
 
@@ -140,7 +139,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	searchTerm := args[0]
+	return args[0]
+}
+
+func main() {
+
+	searchTerm := parseArgs()
 
 	books, err := fetchBooks(searchTerm)
 	if err != nil {
