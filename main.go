@@ -1,9 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/url"
+	"os"
 	"strconv"
 
 	"github.com/gocolly/colly/v2"
@@ -100,9 +102,20 @@ func fetchBooks(term string) ([]Book, error) {
 }
 
 func main() {
-	term := "murakami city"
 
-	books, err := fetchBooks(term)
+	flag.Parse()
+	args := flag.Args()
+
+	// Ensure the positional argument "searchterm" is provided
+	if len(args) < 1 {
+		fmt.Println("Usage: toshi searchterm")
+		fmt.Println("Example: toshi \"deep utopia\"")
+		os.Exit(1)
+	}
+
+	searchTerm := args[0]
+
+	books, err := fetchBooks(searchTerm)
 	if err != nil {
 		log.Fatalf("Error fetching books: %v", err)
 	}
