@@ -75,7 +75,7 @@ func fetchBooks(term string) ([]Book, error) {
 			Extension: e.ChildText("td:nth-child(9)"),
 			Mirrors: []string{
 				e.ChildAttr("td:nth-child(10) a:nth-child(1)", "href"),
-				e.ChildAttr("td:nth-child(10) a:nth-child(2)", "href"),
+				e.ChildAttr("td:nth-child(11) a:nth-child(1)", "href"),
 			},
 			Edit: e.ChildAttr("td:nth-child(11) a", "href"),
 		}
