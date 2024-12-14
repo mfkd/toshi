@@ -4,12 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/url"
-	"strings"
 
-	// It uses testify. I don't like it
-	"github.com/PuerkitoBio/goquery"
-
-	colly "github.com/gocolly/colly/v2"
+	"github.com/gocolly/colly/v2"
 )
 
 type Book struct {
@@ -26,91 +22,85 @@ type Book struct {
 	Edit      string
 }
 
-func fetchLibgen(term string) (string, error) {
-	libgenTemplate := "https://libgen.is/search.php?req=%s&column=title"
-	query := fmt.Sprintf(libgenTemplate, url.QueryEscape(term))
+// Base URL for the LibGen search
+const libgenSearchBaseURL = "https://libgen.is/search.php"
 
-	// Create a channel to pass the response body
-	responseChannel := make(chan string, 1)
-	errorChannel := make(chan error, 1)
-
-	// Create a new collector
-	c := colly.NewCollector()
-
-	// Set up a handler for the response
-	c.OnResponse(func(r *colly.Response) {
-		responseChannel <- string(r.Body) // Send the response body to the channel
-	})
-
-	// Handle errors
-	c.OnError(func(r *colly.Response, err error) {
-		errorChannel <- fmt.Errorf("request URL: %s failed with status: %d. Error: %w", r.Request.URL, r.StatusCode, err)
-	})
-
-	// Visit the URL
-	go func() {
-		err := c.Visit(query)
-		if err != nil {
-			errorChannel <- err
-		}
-	}()
-
-	// Wait for either the response or an error
-	select {
-	case response := <-responseChannel:
-		return response, nil
-	case err := <-errorChannel:
-		return "", err
-	}
+// Helper function to construct the search URL on TITLE Column
+func constructTitleSearchURL(term string) string {
+	params := url.Values{}
+	params.Add("req", term)
+	params.Add("column", "title")
+	return fmt.Sprintf("%s?%s", libgenSearchBaseURL, params.Encode())
 }
 
-func main() {
-	term := "deep utopia"
-	body, err := fetchLibgen(term)
-	if err != nil {
-		log.Fatalf("Error fetching Libgen: %v", err)
-	}
-
-	// Use the response body
-	fetchBooks(body)
+// Helper function to construct the search URL on ALL Column
+func constructDefaultSearchURL(term string) string {
+	params := url.Values{}
+	params.Add("req", term)
+	params.Add("column", "def")
+	return fmt.Sprintf("%s?%s", libgenSearchBaseURL, params.Encode())
 }
 
-func fetchBooks(html string) {
-
-	// Load the HTML document
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Slice to hold books
+func fetchBooks(term string) ([]Book, error) {
 	var books []Book
 
-	// Find table rows containing book details
-	doc.Find("tr[valign=top]").Each(func(i int, row *goquery.Selection) {
-		// Extract data
-		book := Book{
-			ID:        row.Find("td").Eq(0).Text(),
-			Authors:   row.Find("td").Eq(1).Text(),
-			Title:     row.Find("td").Eq(2).Text(),
-			Publisher: row.Find("td").Eq(3).Text(),
-			Year:      row.Find("td").Eq(4).Text(),
-			Pages:     row.Find("td").Eq(5).Text(),
-			Language:  row.Find("td").Eq(6).Text(),
-			Size:      row.Find("td").Eq(7).Text(),
-			Extension: row.Find("td").Eq(8).Text(),
-			Mirrors: []string{
-				row.Find("td").Eq(9).Find("a").Eq(0).AttrOr("href", ""),
-				row.Find("td").Eq(9).Find("a").Eq(1).AttrOr("href", ""),
-			},
-			Edit: row.Find("td").Eq(10).Find("a").AttrOr("href", ""),
-		}
+	// Create a Colly collector
+	c := colly.NewCollector(
+		colly.AllowedDomains("libgen.is", "libgen.rs"),
+	)
 
-		// Append to books slice
+	// Set headers
+	c.OnRequest(func(r *colly.Request) {
+		r.Headers.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36")
+	})
+
+	// Handle book rows
+	c.OnHTML("tr[valign=top]", func(e *colly.HTMLElement) {
+		book := Book{
+			ID:        e.ChildText("td:nth-child(1)"),
+			Authors:   e.ChildText("td:nth-child(2)"),
+			Title:     e.ChildText("td:nth-child(3)"),
+			Publisher: e.ChildText("td:nth-child(4)"),
+			Year:      e.ChildText("td:nth-child(5)"),
+			Pages:     e.ChildText("td:nth-child(6)"),
+			Language:  e.ChildText("td:nth-child(7)"),
+			Size:      e.ChildText("td:nth-child(8)"),
+			Extension: e.ChildText("td:nth-child(9)"),
+			Mirrors: []string{
+				e.ChildAttr("td:nth-child(10) a:nth-child(1)", "href"),
+				e.ChildAttr("td:nth-child(10) a:nth-child(2)", "href"),
+			},
+			Edit: e.ChildAttr("td:nth-child(11) a", "href"),
+		}
 		books = append(books, book)
 	})
 
-	// Print the books
+	// Log errors with response details
+	c.OnError(func(r *colly.Response, err error) {
+		log.Printf("Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
+	})
+
+	// Construct the search URL using the helper function
+	searchURL := constructDefaultSearchURL(term)
+
+	// Visit the search page
+	err := c.Visit(searchURL)
+	if err != nil {
+		return nil, fmt.Errorf("error visiting Libgen: %w", err)
+	}
+
+	return books, nil
+}
+
+func main() {
+	term := "murakami city"
+
+	books, err := fetchBooks(term)
+	if err != nil {
+		log.Fatalf("Error fetching books: %v", err)
+	}
+
+	fmt.Printf("Found %d books:\n", len(books))
 	for _, book := range books {
 		fmt.Printf("%+v\n", book)
 	}
