@@ -47,6 +47,7 @@ func setupCollector() *colly.Collector {
 // processBooks handles the user selection, fetches download links, and attempts to download the selected book.
 func processBooks(c *colly.Collector, books []libgen.Book) {
 	// Allow the user to select a book from the filtered list (e.g., EPUB books)
+	// TODO: Make user select extension type as an argument
 	selectedBook := ui.SelectBook(libgen.FilterEPUB(books))
 	if selectedBook == nil {
 		log.Println("No book selected.")
