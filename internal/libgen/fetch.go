@@ -40,7 +40,7 @@ func searchHandler(e *colly.HTMLElement, books *[]Book) {
 		return
 	}
 
-	title, isbns := ExtractTitleAndISBN(e.ChildText("td:nth-child(3) a"))
+	title, isbns := extractTitleAndISBN(e.ChildText("td:nth-child(3) a"))
 
 	book := Book{
 		ID:        id,
@@ -99,7 +99,7 @@ func fetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
 	})
 
 	// Build the search URL
-	searchURL := DefaultSearchURL(term)
+	searchURL := defaultSearchURL(term)
 
 	// Visit the search page
 	err := c.Visit(searchURL)
@@ -125,7 +125,7 @@ func fetchBooksFromURLs(c *colly.Collector, urls []string) ([]Book, error) {
 
 func FetchAllBooks(c *colly.Collector, term string) ([]Book, error) {
 	// Fetch the URLs of pages
-	booksFromFirstPage, err := fetchBooks(c, DefaultSearchURL(term))
+	booksFromFirstPage, err := fetchBooks(c, defaultSearchURL(term))
 	if err != nil {
 		return nil, fmt.Errorf("error fetching books from first page 1 url: %w", err)
 	}

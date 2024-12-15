@@ -15,7 +15,7 @@ func SelectBook(books []libgen.Book) *libgen.Book {
 	startIndex := 0
 
 	for {
-		DisplayBooksPaginated(books, startIndex)
+		displayBooksPaginated(books, startIndex)
 
 		color.New(color.FgYellow).Printf("\nOptions:\n")
 		fmt.Println("Enter the number of the book to select it.")

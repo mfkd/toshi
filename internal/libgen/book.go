@@ -26,7 +26,7 @@ type Book struct {
 // Extract title and ISBN numbers from a string
 // TODO: Consider a more robust ISBN regex and think about error handling
 // isbnRegex := regexp.MustCompile(`\b(?:\d{9}[\dX]|\d{13})\b`)
-func ExtractTitleAndISBN(input string) (string, []string) {
+func extractTitleAndISBN(input string) (string, []string) {
 
 	// Regular expression to match ISBN numbers
 	isbnRegex := regexp.MustCompile(`\b\d{9,13}\b`)

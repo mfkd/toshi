@@ -20,7 +20,7 @@ func getTerminalWidth() int {
 }
 
 // Display a paginated list of books with dynamic dividers
-func DisplayBooksPaginated(books []libgen.Book, startIndex int) {
+func displayBooksPaginated(books []libgen.Book, startIndex int) {
 	terminalWidth := getTerminalWidth()
 	endIndex := startIndex + booksPerPage
 	if endIndex > len(books) {
