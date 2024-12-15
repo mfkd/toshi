@@ -29,7 +29,12 @@ func parseArgs() string {
 
 func setupCollector() *colly.Collector {
 	// Create a Colly collector
-	c := colly.NewCollector()
+	c := colly.NewCollector(
+		// Allow revisiting the base URL to fetch books from the current page and retrieve URLs of
+		// other pages.
+		// TODO: Enhance by reusing the base URL HTML for fetching of books and other pages
+		colly.AllowURLRevisit(),
+	)
 
 	// Set headers
 	c.OnRequest(func(r *colly.Request) {
