@@ -3,6 +3,7 @@ package libgen
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strconv"
 
 	"github.com/gocolly/colly/v2"
@@ -10,12 +11,12 @@ import (
 
 // Fetch a list of books based on the search term
 // TODO: Scrape all pages in response not just page 1.
-func FetchBooks(c *colly.Collector, term string) ([]Book, error) {
+func fetchBooks(c *colly.Collector, term string) ([]Book, error) {
 	var books []Book
 
 	// Handle book rows
 	c.OnHTML("tr[valign=top]", func(e *colly.HTMLElement) {
-		SearchHandler(e, &books)
+		searchHandler(e, &books)
 	})
 
 	// Log errors with response details
@@ -35,7 +36,7 @@ func FetchBooks(c *colly.Collector, term string) ([]Book, error) {
 	return books, nil
 }
 
-func SearchHandler(e *colly.HTMLElement, books *[]Book) {
+func searchHandler(e *colly.HTMLElement, books *[]Book) {
 	id := e.ChildText("td:nth-child(1)")
 	if _, err := strconv.Atoi(id); err != nil {
 		// Skip rows where ID is not numeric (likely header)
@@ -69,7 +70,7 @@ func isValidPage(link string) bool {
 	return re.MatchString(link)
 }
 
-func FetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
+func fetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
 	var pages []string
 	uniqueLinks := make(map[string]struct{}) // Map to store unique links
 
