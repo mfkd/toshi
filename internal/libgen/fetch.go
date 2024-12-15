@@ -69,7 +69,7 @@ func isValidPage(link string) bool {
 	return re.MatchString(link)
 }
 
-func FetchResultPages(c *colly.Collector, term string) ([]string, error) {
+func FetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
 	var pages []string
 	uniqueLinks := make(map[string]struct{}) // Map to store unique links
 
