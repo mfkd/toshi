@@ -63,3 +63,52 @@ func SearchHandler(e *colly.HTMLElement, books *[]Book) {
 	}
 	*books = append(*books, book)
 }
+
+func isValidPage(link string) bool {
+	re := regexp.MustCompile(`search\.php.*&page=\d+`)
+	return re.MatchString(link)
+}
+
+func FetchResultPages(c *colly.Collector, term string) ([]string, error) {
+	var pages []string
+	uniqueLinks := make(map[string]struct{}) // Map to store unique links
+
+	// Capture pagination links
+	// I wanted to make the GoQuery Selector more specific using "div#paginator_example_top ..."
+	// but alas different selectors didn't work. So I opted for a more general approach for now.
+	// We must recursively visit pages since only the next consecutive page is returned for each
+	// page visited. They appear to be dynamic loading of some content using AJAX or JavaScript.
+	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
+		href := e.Attr("href")
+		if isValidPage(href) {
+			// Resolve relative URL to absolute URL
+			fullURL := e.Request.AbsoluteURL(href)
+
+			// Add only unique links
+			if _, exists := uniqueLinks[fullURL]; !exists {
+				uniqueLinks[fullURL] = struct{}{}
+				pages = append(pages, fullURL)
+
+				// Recursively visit this page
+				e.Request.Visit(fullURL)
+			}
+		}
+	})
+
+	// Log errors with response details
+	c.OnError(func(r *colly.Response, err error) {
+		log.Printf("Fetch Pages Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
+	})
+
+	// Build the search URL
+	searchURL := DefaultSearchURL(term)
+
+	// Visit the search page
+	err := c.Visit(searchURL)
+	if err != nil {
+		return nil, fmt.Errorf("error visiting Libgen: %w", err)
+	}
+
+	// Return the collected unique pages
+	return pages, nil
+}
