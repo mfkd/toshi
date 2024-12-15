@@ -25,7 +25,7 @@ func SelectBook(books []libgen.Book) *libgen.Book {
 		if startIndex+booksPerPage < len(books) {
 			color.New(color.FgMagenta).Println("Enter 'n' for Next page.")
 		}
-		color.New(color.FgRed).Println("Enter 'e' to Exit.")
+		color.New(color.FgRed).Println("Enter 'q' to Quit.")
 		fmt.Print("Your choice: ")
 
 		var input string
@@ -35,7 +35,7 @@ func SelectBook(books []libgen.Book) *libgen.Book {
 			startIndex += booksPerPage
 		} else if input == "p" && startIndex > 0 {
 			startIndex -= booksPerPage
-		} else if input == "e" {
+		} else if input == "q" {
 			return nil
 		} else {
 			selection, err := strconv.Atoi(input)
