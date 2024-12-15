@@ -39,33 +39,38 @@ func SetupDownloadCollector(c *colly.Collector, filename string) error {
 		fmt.Printf("File successfully downloaded to: %s", filePath)
 	})
 
+	// Log errors with response details
+	c.OnError(func(r *colly.Response, err error) {
+		logger.Errorf("Download File Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
+	})
+
 	return nil
 }
 
 func TryDownloadLinks(c *colly.Collector, downloadLinks []string, filename string) error {
-	outputDir := downloadDir
-	savePath := filepath.Join(outputDir, filename)
-
 	if err := SetupDownloadCollector(c, filename); err != nil {
 		return err
 	}
 
 	var err error
 	for _, link := range downloadLinks {
-		if err = downloadFile(c, link, savePath); err == nil {
+		if err = downloadFile(c, link); err == nil {
 			logger.Debugf("Successfully downloaded file from link: %s\n", link)
 			break
 		}
 	}
+
 	return err
 }
 
-func downloadFile(c *colly.Collector, fileURL, savePath string) error {
+func downloadFile(c *colly.Collector, fileURL string) error {
 	err := c.Visit(fileURL)
 	if err != nil {
 		logger.Errorf("Failed to visit file URL: %v", err)
 		return err
 	}
+	c.Wait()
+
 	return nil
 }
 
@@ -91,5 +96,7 @@ func FetchDownloadLinks(c *colly.Collector, b Book) []string {
 	if err != nil {
 		logger.Errorf("Error visiting mirror link: %v", err)
 	}
+	c.Wait()
+
 	return downloadLinks
 }

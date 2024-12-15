@@ -32,6 +32,7 @@ func fetchBooks(c *colly.Collector, url string) ([]Book, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error visiting Libgen: %w", err)
 	}
+	c.Wait()
 
 	return books, nil
 }
@@ -112,8 +113,8 @@ func fetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error visiting Libgen: %w", err)
 	}
-
 	c.Wait()
+
 	// Return the collected unique pages
 	return pages, nil
 }
