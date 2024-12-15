@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"sync"
 
 	"github.com/gocolly/colly/v2"
+
 	"github.com/mfkd/toshi/internal/logger"
 )
 
@@ -70,6 +72,7 @@ func isValidPage(link string) bool {
 func fetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
 	var pages []string
 	uniqueLinks := make(map[string]struct{}) // Map to store unique links
+	var mu sync.Mutex
 
 	// Capture pagination links
 	// I wanted to make the GoQuery Selector more specific using "div#paginator_example_top ..."
@@ -83,12 +86,15 @@ func fetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
 			fullURL := e.Request.AbsoluteURL(href)
 
 			// Add only unique links
+			mu.Lock()
 			if _, exists := uniqueLinks[fullURL]; !exists {
 				uniqueLinks[fullURL] = struct{}{}
 				pages = append(pages, fullURL)
-
+				mu.Unlock()
 				// Recursively visit this page
 				e.Request.Visit(fullURL)
+			} else {
+				mu.Unlock()
 			}
 		}
 	})
@@ -107,6 +113,7 @@ func fetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
 		return nil, fmt.Errorf("error visiting Libgen: %w", err)
 	}
 
+	c.Wait()
 	// Return the collected unique pages
 	return pages, nil
 }
