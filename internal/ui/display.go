@@ -8,7 +8,7 @@ import (
 	"github.com/fatih/color"
 )
 
-// Display a paginated list of books
+// Display a paginated list of books with single-line display
 func DisplayBooksPaginated(books []libgen.Book, startIndex int) {
 	endIndex := startIndex + booksPerPage
 	if endIndex > len(books) {
@@ -18,39 +18,28 @@ func DisplayBooksPaginated(books []libgen.Book, startIndex int) {
 	// Color styles
 	dividerColor := color.New(color.FgHiBlack)
 	headerColor := color.New(color.FgCyan).Add(color.Bold)
-	fieldLabelColor := color.New(color.FgHiBlue).Add(color.Bold)
-	fieldValueColor := color.New(color.FgWhite)
+	bookColor := color.New(color.FgWhite)
 
 	dividerColor.Println(strings.Repeat("=", 100))
 	headerColor.Printf("Books %d to %d of %d\n", startIndex+1, endIndex, len(books))
 	dividerColor.Println(strings.Repeat("=", 100))
 
-	// Display each book in detail
+	// Display each book on a single line
 	for i := startIndex; i < endIndex; i++ {
 		book := books[i]
-		headerColor.Printf("Book #%d\n", i+1)
-		fieldLabelColor.Printf("Title       : ")
-		fieldValueColor.Println(book.Title)
-		fieldLabelColor.Printf("Author(s)   : ")
-		fieldValueColor.Println(book.Authors)
-		fieldLabelColor.Printf("Year        : ")
-		fieldValueColor.Println(book.Year)
-		fieldLabelColor.Printf("Publisher   : ")
-		fieldValueColor.Println(book.Publisher)
-		fieldLabelColor.Printf("Pages       : ")
-		fieldValueColor.Println(book.Pages)
-		fieldLabelColor.Printf("Language    : ")
-		fieldValueColor.Println(book.Language)
-		fieldLabelColor.Printf("Size        : ")
-		fieldValueColor.Println(book.Size)
-		fieldLabelColor.Printf("Format      : ")
-		fieldValueColor.Println(book.Extension)
-		fieldLabelColor.Printf("ISBN(s)     : ")
-		fieldValueColor.Println(strings.Join(book.ISBN, ", "))
-		fieldLabelColor.Printf("Mirrors     : ")
-		fieldValueColor.Println(strings.Join(book.Mirrors, ", "))
-		fieldLabelColor.Printf("Edition     : ")
-		fieldValueColor.Println(book.Edit)
-		dividerColor.Println(strings.Repeat("-", 100))
+		bookColor.Printf(
+			"#%d | Title: %s | Author(s): %s | Year: %s | Publisher: %s | Pages: %s | Lang: %s | Size: %s | Format: %s | ISBN(s): %s\n",
+			i+1,
+			book.Title,
+			book.Authors,
+			book.Year,
+			book.Publisher,
+			book.Pages,
+			book.Language,
+			book.Size,
+			book.Extension,
+			strings.Join(book.ISBN, ", "),
+		)
 	}
+	dividerColor.Println(strings.Repeat("=", 100))
 }
