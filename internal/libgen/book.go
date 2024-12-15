@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+// TODO: Enhance filtering by ordering books by most complete metadata
+
 type Book struct {
 	ID        string
 	Authors   string
