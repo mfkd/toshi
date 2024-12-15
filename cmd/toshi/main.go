@@ -16,7 +16,7 @@ var verbose bool // Declare a global variable for verbose flag
 
 func parseArgs() string {
 	// Define the verbose flag
-	flag.BoolVar(&verbose, "v", false, "Enable verbose output with debug logs")
+	flag.BoolVar(&verbose, "v", true, "Enable verbose output with debug logs")
 
 	flag.Parse()
 
