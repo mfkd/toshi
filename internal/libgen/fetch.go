@@ -113,3 +113,31 @@ func fetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
 	// Return the collected unique pages
 	return pages, nil
 }
+
+func fetchBooksFromURLs(c *colly.Collector, urls []string) ([]Book, error) {
+	var books []Book
+	for _, page := range urls {
+		booksOnPage, err := fetchBooks(c, page)
+		if err != nil {
+			return nil, fmt.Errorf("error fetching books from URL %s: %w", page, err)
+		}
+		books = append(books, booksOnPage...)
+	}
+	return books, nil
+}
+
+func FetchAllBooks(c *colly.Collector, term string) ([]Book, error) {
+	// Fetch the URLs of pages
+	urls, err := fetchPagesURLs(c, term)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching page URLs for term %q: %w", term, err)
+	}
+
+	// Fetch books from the URLs
+	allBooks, err := fetchBooksFromURLs(c, urls)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching books from URLs: %w", err)
+	}
+
+	return allBooks, nil
+}
