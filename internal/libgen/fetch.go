@@ -2,11 +2,11 @@ package libgen
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"strconv"
 
 	"github.com/gocolly/colly/v2"
+	"github.com/mfkd/toshi/internal/logger"
 )
 
 // Fetch a list of books based on the search term
@@ -21,7 +21,7 @@ func fetchBooks(c *colly.Collector, url string) ([]Book, error) {
 
 	// Log errors with response details
 	c.OnError(func(r *colly.Response, err error) {
-		log.Printf("Fetch Books Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
+		logger.Errorf("Fetch Books Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
 	})
 
 	// Visit the search page
@@ -95,7 +95,7 @@ func fetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
 
 	// Log errors with response details
 	c.OnError(func(r *colly.Response, err error) {
-		log.Printf("Fetch Pages Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
+		logger.Errorf("Fetch Pages Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
 	})
 
 	// Build the search URL

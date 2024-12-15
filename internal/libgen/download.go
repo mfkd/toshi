@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/gocolly/colly/v2"
+	"github.com/mfkd/toshi/internal/logger"
 )
 
 const downloadDir = "output"
@@ -25,18 +25,18 @@ func SetupDownloadCollector(c *colly.Collector, filename string) error {
 	c.OnResponse(func(r *colly.Response) {
 		file, err := os.Create(filePath)
 		if err != nil {
-			log.Printf("Failed to create file: %v", err)
+			logger.Errorf("Failed to create file: %v", err)
 			return
 		}
 		defer file.Close()
 
 		_, err = io.Copy(file, bytes.NewReader(r.Body))
 		if err != nil {
-			log.Printf("Failed to write to file: %v", err)
+			logger.Errorf("Failed to write to file: %v", err)
 			return
 		}
 
-		log.Printf("File successfully downloaded to: %s", filePath)
+		fmt.Printf("File successfully downloaded to: %s", filePath)
 	})
 
 	return nil
@@ -53,7 +53,7 @@ func TryDownloadLinks(c *colly.Collector, downloadLinks []string, filename strin
 	var err error
 	for _, link := range downloadLinks {
 		if err = downloadFile(c, link, savePath); err == nil {
-			log.Printf("Successfully downloaded file from link: %s\n", link)
+			logger.Debugf("Successfully downloaded file from link: %s\n", link)
 			break
 		}
 	}
@@ -63,7 +63,7 @@ func TryDownloadLinks(c *colly.Collector, downloadLinks []string, filename strin
 func downloadFile(c *colly.Collector, fileURL, savePath string) error {
 	err := c.Visit(fileURL)
 	if err != nil {
-		log.Printf("Failed to visit file URL: %v", err)
+		logger.Errorf("Failed to visit file URL: %v", err)
 		return err
 	}
 	return nil
@@ -83,13 +83,13 @@ func FetchDownloadLinks(c *colly.Collector, b Book) []string {
 
 	// Log errors with response details
 	c.OnError(func(r *colly.Response, err error) {
-		log.Printf("Download Links Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
+		logger.Errorf("Download Links Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
 	})
 
 	// TODO: Fetch all mirror links not just index 0
 	err := c.Visit(b.Mirrors[0])
 	if err != nil {
-		log.Printf("Error visiting mirror link: %v", err)
+		logger.Errorf("Error visiting mirror link: %v", err)
 	}
 	return downloadLinks
 }

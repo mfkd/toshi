@@ -3,24 +3,30 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/gocolly/colly/v2"
 
 	"github.com/mfkd/toshi/internal/libgen"
+	"github.com/mfkd/toshi/internal/logger"
 	"github.com/mfkd/toshi/internal/ui"
 )
 
+var verbose bool // Declare a global variable for verbose flag
+
 func parseArgs() string {
+	// Define the verbose flag
+	flag.BoolVar(&verbose, "v", false, "Enable verbose output with debug logs")
+
 	flag.Parse()
+
 	args := flag.Args()
 
 	// Ensure the positional argument "searchterm" is provided
 	// TODO: Provide more informative output when user provides invalid input
 	if len(args) < 1 {
-		log.Println("Usage: toshi searchterm")
-		log.Println("Example: toshi \"deep utopia\"")
+		fmt.Println("Usage: toshi searchterm")
+		fmt.Println("Example: toshi \"deep utopia\"")
 		os.Exit(1)
 	}
 
@@ -50,7 +56,7 @@ func processBooks(c *colly.Collector, books []libgen.Book) {
 	// TODO: Make user select extension type as an argument
 	selectedBook := ui.SelectBook(libgen.FilterEPUB(books))
 	if selectedBook == nil {
-		log.Println("No book selected.")
+		fmt.Println("No book selected.")
 		return
 	}
 
@@ -62,7 +68,7 @@ func processBooks(c *colly.Collector, books []libgen.Book) {
 	// Attempt to download the file
 	fileName := libgen.FileName(*selectedBook)
 	if err := libgen.TryDownloadLinks(c, downloadLinks, fileName); err != nil {
-		log.Printf("Failed to download file for book %s: %v", selectedBook.Title, err)
+		logger.Errorf("Failed to download file for book %s: %v", selectedBook.Title, err)
 	} else {
 		fmt.Printf("Book downloaded successfully as %s\n", fileName)
 	}
@@ -73,9 +79,13 @@ func main() {
 
 	searchTerm := parseArgs()
 
+	if verbose {
+		logger.Configure(logger.LevelDebug, nil)
+	}
+
 	books, err := libgen.FetchAllBooks(c, searchTerm)
 	if err != nil {
-		log.Fatalf("Error fetching books from ages: %v", err)
+		logger.Fatalf("Error fetching books from ages: %v", err)
 	}
 
 	processBooks(c, books)
