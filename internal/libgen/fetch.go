@@ -23,6 +23,7 @@ func fetchBooks(c *colly.Collector, url string) ([]Book, error) {
 
 	// Log errors with response details
 	c.OnError(func(r *colly.Response, err error) {
+		// Debug over Error as we want to try available links until we succeed.
 		logger.Debugf("Fetch Books Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
 	})
 
