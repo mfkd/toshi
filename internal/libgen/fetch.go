@@ -79,12 +79,11 @@ func fetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
 	// but alas different selectors didn't work. So I opted for a more general approach for now.
 	// We must recursively visit pages since only the next consecutive page is returned for each
 	// page visited. They appear to be dynamic loading of some content using AJAX or JavaScript.
-	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
+	c.OnHTML("tbody a", func(e *colly.HTMLElement) {
 		href := e.Attr("href")
 		if isValidPage(href) {
 			// Resolve relative URL to absolute URL
 			fullURL := e.Request.AbsoluteURL(href)
-
 			// Add only unique links
 			mu.Lock()
 			if _, exists := uniqueLinks[fullURL]; !exists {
