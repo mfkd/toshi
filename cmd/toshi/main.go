@@ -69,14 +69,13 @@ func processBooks(c *colly.Collector, books []libgen.Book) {
 }
 
 func main() {
-
 	c := setupCollector()
 
 	searchTerm := parseArgs()
 
-	books, err := libgen.FetchBooks(c, searchTerm)
+	books, err := libgen.FetchAllBooks(c, searchTerm)
 	if err != nil {
-		log.Fatalf("Error fetching books: %v", err)
+		log.Fatalf("Error fetching books from ages: %v", err)
 	}
 
 	processBooks(c, books)
