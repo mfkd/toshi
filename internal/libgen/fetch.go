@@ -11,7 +11,7 @@ import (
 
 // Fetch a list of books based on the search term
 // TODO: Scrape all pages in response not just page 1.
-func fetchBooks(c *colly.Collector, term string) ([]Book, error) {
+func fetchBooks(c *colly.Collector, url string) ([]Book, error) {
 	var books []Book
 
 	// Handle book rows
@@ -24,11 +24,8 @@ func fetchBooks(c *colly.Collector, term string) ([]Book, error) {
 		log.Printf("Fetch Books Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
 	})
 
-	// Construct the search URL using the helper function
-	searchURL := DefaultSearchURL(term)
-
 	// Visit the search page
-	err := c.Visit(searchURL)
+	err := c.Visit(url)
 	if err != nil {
 		return nil, fmt.Errorf("error visiting Libgen: %w", err)
 	}
@@ -110,6 +107,10 @@ func fetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
 		return nil, fmt.Errorf("error visiting Libgen: %w", err)
 	}
 
+	for _, p := range pages {
+		fmt.Println("Page: ", p)
+	}
+
 	// Return the collected unique pages
 	return pages, nil
 }
@@ -128,16 +129,23 @@ func fetchBooksFromURLs(c *colly.Collector, urls []string) ([]Book, error) {
 
 func FetchAllBooks(c *colly.Collector, term string) ([]Book, error) {
 	// Fetch the URLs of pages
+	booksFromFirstPage, err := fetchBooks(c, DefaultSearchURL(term))
+	if err != nil {
+		return nil, fmt.Errorf("error fetching books from first page 1 url: %w", err)
+	}
+
 	urls, err := fetchPagesURLs(c, term)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching page URLs for term %q: %w", term, err)
 	}
 
 	// Fetch books from the URLs
-	allBooks, err := fetchBooksFromURLs(c, urls)
+	booksFromOtherPages, err := fetchBooksFromURLs(c, urls)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching books from URLs: %w", err)
 	}
+
+	allBooks := append(booksFromFirstPage, booksFromOtherPages...)
 
 	return allBooks, nil
 }
