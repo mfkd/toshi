@@ -1,45 +1,102 @@
 package ui
 
 import (
+	"fmt"
 	"strings"
-
-	"github.com/mfkd/toshi/internal/libgen"
+	"syscall"
 
 	"github.com/fatih/color"
+	"github.com/mfkd/toshi/internal/libgen"
+	"golang.org/x/term"
 )
 
-// Display a paginated list of books with single-line display
+// Function to get the terminal width dynamically
+func getTerminalWidth() int {
+	width, _, err := term.GetSize(int(syscall.Stdout))
+	if err != nil {
+		return 80 // Fallback to a default width
+	}
+	return width
+}
+
+// Display a paginated list of books with dynamic dividers
 func DisplayBooksPaginated(books []libgen.Book, startIndex int) {
+	terminalWidth := getTerminalWidth()
 	endIndex := startIndex + booksPerPage
 	if endIndex > len(books) {
 		endIndex = len(books)
 	}
 
-	// Color styles
-	dividerColor := color.New(color.FgHiBlack)
-	headerColor := color.New(color.FgCyan).Add(color.Bold)
-	bookColor := color.New(color.FgWhite)
+	// Define color styles optimized for light and dark modes
+	dividerColor := color.New(color.FgBlue)                   // Regular blue for dividers
+	headerColor := color.New(color.FgHiWhite).Add(color.Bold) // Bold white for headers
+	indexColor := color.New(color.FgYellow).Add(color.Bold)   // Regular yellow for index
+	titleColor := color.New(color.FgCyan).Add(color.Bold)     // Bold cyan for titles
+	labelColor := color.New(color.FgBlue).Add(color.Bold)     // Bold blue for labels
+	valueColor := color.New(color.FgHiWhite).Add(color.Bold)  // Bold white for field values
+	optionColor := color.New(color.FgRed).Add(color.Bold)     // Bold red for options
 
-	dividerColor.Println(strings.Repeat("=", 100))
-	headerColor.Printf("Books %d to %d of %d\n", startIndex+1, endIndex, len(books))
-	dividerColor.Println(strings.Repeat("=", 100))
+	// Print the centered header
+	dividerColor.Println(strings.Repeat("=", terminalWidth))
+	header := fmt.Sprintf("Books %d to %d of %d", startIndex+1, endIndex, len(books))
+	fmt.Printf("%s%s%s\n", strings.Repeat(" ", (terminalWidth-len(header))/2), headerColor.Sprint(header), strings.Repeat(" ", (terminalWidth-len(header))/2))
+	dividerColor.Println(strings.Repeat("=", terminalWidth))
 
-	// Display each book on a single line
+	// Print each book
 	for i := startIndex; i < endIndex; i++ {
 		book := books[i]
-		bookColor.Printf(
-			"#%d | Title: %s | Author(s): %s | Year: %s | Publisher: %s | Pages: %s | Lang: %s | Size: %s | Format: %s | ISBN(s): %s\n",
-			i+1,
-			book.Title,
-			book.Authors,
-			book.Year,
-			book.Publisher,
-			book.Pages,
-			book.Language,
-			book.Size,
-			book.Extension,
-			strings.Join(book.ISBN, ", "),
-		)
+
+		// Print book index
+		indexColor.Printf("#%d\n", i+1)
+
+		// Print book details with refined alignment and hide empty fields
+		if book.Title != "" {
+			titleColor.Printf("  Title:       ")
+			valueColor.Printf("%s\n", book.Title)
+		}
+		if book.Authors != "" {
+			labelColor.Print("  Author(s):   ")
+			valueColor.Println(book.Authors)
+		}
+		if book.Year != "" {
+			labelColor.Print("  Year:        ")
+			valueColor.Println(book.Year)
+		}
+		if book.Publisher != "" {
+			labelColor.Print("  Publisher:   ")
+			valueColor.Println(book.Publisher)
+		}
+		if book.Pages != "" {
+			labelColor.Print("  Pages:       ")
+			valueColor.Println(book.Pages)
+		}
+		if book.Language != "" {
+			labelColor.Print("  Language:    ")
+			valueColor.Println(book.Language)
+		}
+		if book.Size != "" {
+			labelColor.Print("  Size:        ")
+			valueColor.Println(book.Size)
+		}
+		if book.Extension != "" {
+			labelColor.Print("  Format:      ")
+			valueColor.Println(book.Extension)
+		}
+		if len(book.ISBN) > 0 {
+			labelColor.Print("  ISBN(s):     ")
+			valueColor.Println(strings.Join(book.ISBN, ", "))
+		}
+
+		// Add a dashed divider between books
+		dividerColor.Println(strings.Repeat("-", terminalWidth))
+		fmt.Println() // Add extra vertical space for better readability
 	}
-	dividerColor.Println(strings.Repeat("=", 100))
+
+	// Final divider
+	dividerColor.Println(strings.Repeat("=", terminalWidth))
+
+	// Print options at the end
+	optionColor.Println("Options:")
+	optionColor.Println("Enter the number of the book to select it.")
+	optionColor.Println("Enter 'q' to Quit.")
 }
