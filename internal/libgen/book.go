@@ -45,9 +45,8 @@ func ExtractTitleAndISBN(input string) (string, []string) {
 }
 
 // Generate a filename for the book
-// TODO: Fix filename appending "_.epub" at times
 func FileName(b Book) string {
-	return fmt.Sprintf("%s.%s", strings.ReplaceAll(b.Title, " ", "_"), strings.TrimSpace(b.Extension))
+	return fmt.Sprintf("%s.%s", strings.ReplaceAll(strings.TrimSpace(b.Title), " ", "_"), strings.TrimSpace(b.Extension))
 }
 
 // Filter books to only include those with the "epub" extension
