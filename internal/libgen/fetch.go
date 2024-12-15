@@ -107,10 +107,6 @@ func fetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
 		return nil, fmt.Errorf("error visiting Libgen: %w", err)
 	}
 
-	for _, p := range pages {
-		fmt.Println("Page: ", p)
-	}
-
 	// Return the collected unique pages
 	return pages, nil
 }
