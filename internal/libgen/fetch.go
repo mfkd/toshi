@@ -23,7 +23,7 @@ func fetchBooks(c *colly.Collector, url string) ([]Book, error) {
 
 	// Log errors with response details
 	c.OnError(func(r *colly.Response, err error) {
-		logger.Errorf("Fetch Books Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
+		logger.Debugf("Fetch Books Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
 	})
 
 	// Visit the search page
