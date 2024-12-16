@@ -1,26 +1,27 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/gocolly/colly/v2"
+	"github.com/spf13/pflag"
 
 	"github.com/mfkd/toshi/internal/libgen"
 	"github.com/mfkd/toshi/internal/logger"
 	"github.com/mfkd/toshi/internal/ui"
 )
 
-var verbose bool // Declare a global variable for verbose flag
+var verbose *bool // Declare a global variable for verbose flag
 
 func parseArgs() string {
 	// Define the verbose flag
-	flag.BoolVar(&verbose, "v", false, "Enable verbose output with debug logs")
+	verbose = pflag.BoolP("verbose", "v", false, "Enable verbose output with debug logs")
 
-	flag.Parse()
+	pflag.Parse()
 
-	args := flag.Args()
+	args := pflag.Args()
 
 	// Ensure the positional argument "searchterm" is provided
 	// TODO: Provide more informative output when user provides invalid input
@@ -30,7 +31,7 @@ func parseArgs() string {
 		os.Exit(1)
 	}
 
-	return args[0]
+	return strings.Join(args, " ")
 }
 
 func setupCollector() *colly.Collector {
@@ -79,7 +80,7 @@ func main() {
 
 	searchTerm := parseArgs()
 
-	if verbose {
+	if *verbose {
 		logger.Configure(logger.LevelDebug, nil)
 	}
 
