@@ -82,6 +82,7 @@ func main() {
 
 	if *verbose {
 		logger.Configure(logger.LevelDebug, nil)
+		fmt.Println("DEBUG mode: Detailed logs are now enabled")
 	}
 
 	books, err := libgen.FetchAllBooks(c, searchTerm)
