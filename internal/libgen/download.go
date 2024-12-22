@@ -100,6 +100,7 @@ func FetchDownloadLinks(c *colly.Collector, b Book) []string {
 	})
 
 	// TODO: Fetch all mirror links not just index 0
+	// Mirrors[0] contains the most reliable links so we will use it for now.
 	err := c.Visit(b.Mirrors[0])
 	if err != nil {
 		logger.Errorf("Error visiting mirror link: %v", err)
