@@ -28,6 +28,8 @@ func parseArgs() string {
 	if len(args) < 1 {
 		fmt.Println("Usage: toshi <searchterm>")
 		fmt.Println("Example: toshi The Iliad Homer")
+		fmt.Println("Flags:")
+		fmt.Println("  -v  Enable verbose output with debug logs")
 		os.Exit(1)
 	}
 
@@ -68,6 +70,10 @@ func processBooks(c *colly.Collector, books []libgen.Book) {
 
 	// Attempt to download the file
 	fileName := libgen.FileName(*selectedBook)
+
+	if *verbose {
+		fmt.Printf("Attempting to download book to: %s\n", fileName)
+	}
 	if err := libgen.TryDownloadLinks(c, downloadLinks, fileName); err != nil {
 		logger.Errorf("Failed to download file for book %s: %v", selectedBook.Title, err)
 	} else {
