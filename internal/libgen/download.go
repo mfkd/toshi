@@ -41,7 +41,9 @@ func SetupDownloadCollector(c *colly.Collector, filename string) error {
 
 	// Log errors with response details
 	c.OnError(func(r *colly.Response, err error) {
-		logger.Errorf("Download File Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
+		// TODO: Check if there is a way to handle this better.
+		// Debug over Error as we want to try available links until we succeed.
+		logger.Debugf("Download File Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
 	})
 
 	return nil
@@ -55,6 +57,8 @@ func TryDownloadLinks(c *colly.Collector, downloadLinks []string, filename strin
 	var err error
 	for _, link := range downloadLinks {
 		if err = downloadFile(c, link); err == nil {
+			// TODO: Check if there is a way to handle this better.
+			// Debug over Error as we want to try available links until we succeed.
 			logger.Debugf("Successfully downloaded file from link: %s\n", link)
 			break
 		}
@@ -66,7 +70,9 @@ func TryDownloadLinks(c *colly.Collector, downloadLinks []string, filename strin
 func downloadFile(c *colly.Collector, fileURL string) error {
 	err := c.Visit(fileURL)
 	if err != nil {
-		logger.Errorf("Failed to visit file URL: %v", err)
+		// TODO: Check if there is a way to handle this better.
+		// Debug over Error as we want to try available links until we succeed.
+		logger.Debugf("Failed to visit file URL: %v", err)
 		return err
 	}
 	c.Wait()
@@ -88,7 +94,9 @@ func FetchDownloadLinks(c *colly.Collector, b Book) []string {
 
 	// Log errors with response details
 	c.OnError(func(r *colly.Response, err error) {
-		logger.Errorf("Download Links Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
+		// TODO: Check if there is a way to handle this better.
+		// Set logger to debug since we retry fetching pages until we succeed.
+		logger.Debugf("Download Links Error: %v, Status Code: %d, Response: %s", err, r.StatusCode, string(r.Body))
 	})
 
 	// TODO: Fetch all mirror links not just index 0
