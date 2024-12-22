@@ -46,7 +46,45 @@ func extractTitleAndISBN(input string) (string, []string) {
 
 // Generate a filename for the book
 func FileName(b Book) string {
-	return fmt.Sprintf("%s.%s", strings.ReplaceAll(strings.TrimSpace(b.Title), " ", "_"), strings.TrimSpace(b.Extension))
+	parts := make([]string, 0)
+
+	// Add author if available
+	if authors := strings.TrimSpace(b.Authors); authors != "" {
+		parts = append(parts, authors)
+	}
+
+	// Add title if available (required)
+	if title := strings.TrimSpace(b.Title); title != "" {
+		parts = append(parts, title)
+	} else {
+		return "unknown.unknown" // Fallback if no title
+	}
+
+	// Add publisher and year in parentheses if either is available
+	pubYear := make([]string, 0)
+	if pub := strings.TrimSpace(b.Publisher); pub != "" {
+		pubYear = append(pubYear, pub)
+	}
+	if year := strings.TrimSpace(b.Year); year != "" {
+		pubYear = append(pubYear, year)
+	}
+	if len(pubYear) > 0 {
+		parts = append(parts, fmt.Sprintf("(%s)", strings.Join(pubYear, " ")))
+	}
+
+	// Clean the filename components and join with dashes
+	filename := strings.Join(parts, " - ")
+
+	// Replace problematic characters
+	filename = regexp.MustCompile(`[<>:"/\\|?*]`).ReplaceAllString(filename, "_")
+
+	// Add extension
+	ext := strings.TrimSpace(b.Extension)
+	if ext == "" {
+		ext = "unknown"
+	}
+
+	return fmt.Sprintf("%s.%s", filename, ext)
 }
 
 // Filter books to only include those with the "epub" extension
