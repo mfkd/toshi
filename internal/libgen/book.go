@@ -53,12 +53,8 @@ func FileName(b Book) string {
 		parts = append(parts, authors)
 	}
 
-	// Add title if available (required)
-	if title := strings.TrimSpace(b.Title); title != "" {
-		parts = append(parts, title)
-	} else {
-		return "unknown.unknown" // Fallback if no title
-	}
+	// Add title
+	parts = append(parts, strings.TrimSpace(b.Title))
 
 	// Add publisher and year in parentheses if either is available
 	pubYear := make([]string, 0)
@@ -79,12 +75,7 @@ func FileName(b Book) string {
 	filename = regexp.MustCompile(`[<>:"/\\|?*]`).ReplaceAllString(filename, "_")
 
 	// Add extension
-	ext := strings.TrimSpace(b.Extension)
-	if ext == "" {
-		ext = "unknown"
-	}
-
-	return fmt.Sprintf("%s.%s", filename, ext)
+	return fmt.Sprintf("%s.%s", filename, strings.TrimSpace(b.Extension))
 }
 
 // Filter books to only include those with the "epub" extension
