@@ -45,36 +45,57 @@ func extractTitleAndISBN(input string) (string, []string) {
 }
 
 // Generate a filename for the book
-func FileName(b Book) string {
-	parts := make([]string, 0)
+var invalidFilenameChars = regexp.MustCompile(`[<>:"/\\|?*]`)
 
-	// Add author if available
-	if authors := strings.TrimSpace(b.Authors); authors != "" {
-		parts = append(parts, authors)
+// sanitizeComponent removes extra whitespace and replaces invalid characters.
+func sanitizeComponent(input string) string {
+	input = strings.TrimSpace(input)
+	return invalidFilenameChars.ReplaceAllString(input, "_")
+}
+
+// getFirstItem extracts the first item from a semicolon-separated list and sanitizes it.
+func getFirstItem(input string) string {
+	if input == "" {
+		return ""
+	}
+	parts := strings.Split(input, ";")
+	return sanitizeComponent(parts[0])
+}
+
+// FileName generates a filename from book details.
+func FileName(b Book) string {
+	var parts []string
+
+	// Add author if available.
+	if author := getFirstItem(b.Authors); author != "" {
+		parts = append(parts, author)
 	}
 
-	// Add title
-	parts = append(parts, strings.TrimSpace(b.Title))
+	// Add title.
+	if title := sanitizeComponent(b.Title); title != "" {
+		parts = append(parts, title)
+	}
 
-	// Add publisher and year in parentheses if either is available
-	pubYear := make([]string, 0)
-	if pub := strings.TrimSpace(b.Publisher); pub != "" {
-		pubYear = append(pubYear, pub)
+	// Add publisher and year.
+	var pubYear string
+	if publisher := getFirstItem(b.Publisher); publisher != "" {
+		pubYear = publisher
 	}
 	if year := strings.TrimSpace(b.Year); year != "" {
-		pubYear = append(pubYear, year)
+		if pubYear != "" {
+			pubYear = fmt.Sprintf("%s (%s)", pubYear, year)
+		} else {
+			pubYear = year
+		}
 	}
-	if len(pubYear) > 0 {
-		parts = append(parts, fmt.Sprintf("(%s)", strings.Join(pubYear, " ")))
+	if pubYear != "" {
+		parts = append(parts, pubYear)
 	}
 
-	// Clean the filename components and join with dashes
+	// Join parts with dashes.
 	filename := strings.Join(parts, " - ")
+	filename = sanitizeComponent(filename)
 
-	// Replace problematic characters
-	filename = regexp.MustCompile(`[<>:"/\\|?*]`).ReplaceAllString(filename, "_")
-
-	// Add extension
 	return fmt.Sprintf("%s.%s", filename, strings.TrimSpace(b.Extension))
 }
 
