@@ -94,7 +94,9 @@ func fetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
 				pages = append(pages, fullURL)
 				mu.Unlock()
 				// Recursively visit this page
-				e.Request.Visit(fullURL)
+				if err := e.Request.Visit(fullURL); err != nil {
+					logger.Debugf("Error visiting page %s: %v", fullURL, err)
+				}
 			} else {
 				mu.Unlock()
 			}
