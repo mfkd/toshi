@@ -29,7 +29,10 @@ func SelectBook(books []libgen.Book) *libgen.Book {
 		fmt.Print("Your choice: ")
 
 		var input string
-		fmt.Scanln(&input)
+		if _, err := fmt.Scanln(&input); err != nil {
+			color.New(color.FgRed).Println("Error reading input. Please try again.")
+			continue
+		}
 
 		if input == "n" && startIndex+booksPerPage < len(books) {
 			startIndex += booksPerPage
