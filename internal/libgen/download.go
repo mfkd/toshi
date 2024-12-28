@@ -14,7 +14,7 @@ import (
 
 const downloadDir = "output"
 
-func SetupDownloadCollector(c *colly.Collector, filename string) error {
+func setupDownloadCollector(c *colly.Collector, filename string) error {
 	outputDir := downloadDir
 	if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
@@ -50,7 +50,7 @@ func SetupDownloadCollector(c *colly.Collector, filename string) error {
 }
 
 func tryDownloadLinks(c *colly.Collector, downloadLinks []string, filename string) error {
-	if err := SetupDownloadCollector(c, filename); err != nil {
+	if err := setupDownloadCollector(c, filename); err != nil {
 		return err
 	}
 
