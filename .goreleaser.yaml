@@ -12,7 +12,7 @@ before:
 # Build configuration
 builds:
   - id: toshi
-    main: ./cmd/main.go
+    main: main.go
     binary: toshi
     env:
       - CGO_ENABLED=0
