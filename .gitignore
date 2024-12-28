@@ -1,18 +1,5 @@
-# Binaries
-*.exe
-*.dll
-*.so
-*.dylib
-
-# Build directories
-/bin/
-/obj/
-/vendor/
-
 # IDE configs
 .vscode/
-.idea/
 
 # Output directory for file downloads
 output/
-dist/
