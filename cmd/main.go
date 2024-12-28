@@ -12,12 +12,9 @@ import (
 	"github.com/mfkd/toshi/internal/ui"
 )
 
-var verbose *bool // Declare a global variable for verbose flag
-
-func parseArgs() string {
+func parseArgs() (string, bool) {
 	// Define the verbose flag
-	verbose = pflag.BoolP("verbose", "v", false, "Enable verbose output with debug logs")
-
+	verbose := pflag.BoolP("verbose", "v", false, "Enable verbose output with debug logs")
 	pflag.Parse()
 
 	args := pflag.Args()
@@ -32,14 +29,14 @@ func parseArgs() string {
 		os.Exit(1)
 	}
 
-	return strings.Join(args, " ")
+	return strings.Join(args, " "), *verbose
 }
 
 func Execute() {
 	c := libgen.SetupCollector()
-	searchTerm := parseArgs()
+	searchTerm, verbose := parseArgs()
 
-	if *verbose {
+	if verbose {
 		logger.Configure(logger.LevelDebug, nil)
 		fmt.Println("DEBUG mode: Detailed logs are now enabled")
 	}
