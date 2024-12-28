@@ -2,6 +2,7 @@ package libgen
 
 import "github.com/gocolly/colly/v2"
 
+// SetupCollector initializes and returns a configured Colly collector.
 func SetupCollector() *colly.Collector {
 	// Create a Colly collector
 	c := colly.NewCollector(
