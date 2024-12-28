@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -81,7 +81,7 @@ func processBooks(c *colly.Collector, books []libgen.Book) {
 	}
 }
 
-func main() {
+func Execute() {
 	c := setupCollector()
 
 	searchTerm := parseArgs()
