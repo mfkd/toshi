@@ -5,6 +5,22 @@ Toshi is a command-line tool designed for searching books.
 "Toshi" (とし / 知 or 智) is a Japanese word that translates to "wisdom" or
 "knowledge."
 
+## Installation
+
+Ensure you have Go installed, then run:
+
+```sh
+go install github.com/mfkd/toshi
+```
+
+## Usage
+
+Search for the book *The Iliad* by Homer.
+
+```sh
+toshi The Iliad Homer
+```
+
 ## Disclaimer
 
 This software is provided for educational and research purposes only. The
