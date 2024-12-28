@@ -1,5 +1,8 @@
 # IDE configs
 .vscode/
 
+# Goreleaser build artifacts
+dist/
+
 # Output directory for file downloads
 output/
