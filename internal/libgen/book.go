@@ -62,8 +62,8 @@ func getFirstItem(input string) string {
 	return sanitizeComponent(parts[0])
 }
 
-// FileName generates a filename from book details.
-func FileName(b Book) string {
+// fileName generates a filename from book details.
+func fileName(b Book) string {
 	var parts []string
 
 	// Add author if available.
@@ -100,8 +100,8 @@ func FileName(b Book) string {
 }
 
 // Filter books to only include those with the "epub" extension
-// TODO: FilterEPUB could use a more generic filter function with a predicate, making it reusable for other extensions
-func FilterEPUB(books []Book) []Book {
+// TODO: filterEPUB could use a more generic filter function with a predicate, making it reusable for other extensions
+func filterEPUB(books []Book) []Book {
 	var filteredBooks []Book
 	for _, b := range books {
 		if b.Extension == "epub" {

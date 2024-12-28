@@ -136,7 +136,7 @@ func fetchBooksFromURLs(c *colly.Collector, urls []string) ([]Book, error) {
 	return books, nil
 }
 
-func FetchAllBooks(c *colly.Collector, term string) ([]Book, error) {
+func fetchAllBooks(c *colly.Collector, term string) ([]Book, error) {
 	// Fetch the URLs of pages
 	booksFromFirstPage, err := fetchBooks(c, defaultSearchURL(term))
 	if err != nil {

@@ -11,7 +11,9 @@ import (
 
 const booksPerPage = 5
 
-func SelectBook(books []libgen.Book) *libgen.Book {
+type CLI struct{}
+
+func (CLI) SelectBook(books []libgen.Book) *libgen.Book {
 	startIndex := 0
 
 	for {

@@ -49,7 +49,7 @@ func SetupDownloadCollector(c *colly.Collector, filename string) error {
 	return nil
 }
 
-func TryDownloadLinks(c *colly.Collector, downloadLinks []string, filename string) error {
+func tryDownloadLinks(c *colly.Collector, downloadLinks []string, filename string) error {
 	if err := SetupDownloadCollector(c, filename); err != nil {
 		return err
 	}
@@ -80,8 +80,8 @@ func downloadFile(c *colly.Collector, fileURL string) error {
 	return nil
 }
 
-// FetchDownloadLinks extracts valid download links for a book from its mirror pages using a Colly collector.
-func FetchDownloadLinks(c *colly.Collector, b Book) []string {
+// fetchDownloadLinks extracts valid download links for a book from its mirror pages using a Colly collector.
+func fetchDownloadLinks(c *colly.Collector, b Book) []string {
 	// We need to try fetch download links from all Mirrors not just index 0
 	var downloadLinks []string
 	c.OnHTML("div#download ul li a[href]", func(e *colly.HTMLElement) {
