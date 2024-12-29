@@ -76,6 +76,7 @@ func Execute() {
 	}
 
 	c := lib.SetupCollector(selectURL(parseEnv(), embed.GetUrls()))
+
 	searchTerm, verbose := parseArgs()
 
 	if verbose {
