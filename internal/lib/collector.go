@@ -7,16 +7,18 @@ type Collector struct {
 	url string
 }
 
-// SetupCollector initializes and returns a configured Colly collector.
+// SetupCollector initializes and returns a configured collector.
 func SetupCollector(urls []string) Collector {
 	// Create a custom collector
 	c := Collector{
 		colly.NewCollector(
-			// Allow revisiting the base URL to fetch books from the current page and retrieve URLs of
-			// other pages.
+			// Allow revisiting the base URL to fetch books from the current page and retrieve URLs
+			// of other pages.
 			// TODO: Enhance by reusing the base URL HTML for fetching of books and other pages
 			colly.AllowURLRevisit(),
 		),
+		// TODO: Add support for multiple URLs to improve reliability in the event of server
+		// outages.
 		urls[0],
 	}
 
