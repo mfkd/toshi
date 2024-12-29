@@ -2,15 +2,23 @@ package lib
 
 import "github.com/gocolly/colly/v2"
 
+type Collector struct {
+	*colly.Collector
+	url string
+}
+
 // SetupCollector initializes and returns a configured Colly collector.
-func SetupCollector() *colly.Collector {
-	// Create a Colly collector
-	c := colly.NewCollector(
-		// Allow revisiting the base URL to fetch books from the current page and retrieve URLs of
-		// other pages.
-		// TODO: Enhance by reusing the base URL HTML for fetching of books and other pages
-		colly.AllowURLRevisit(),
-	)
+func SetupCollector(urls []string) Collector {
+	// Create a custom collector
+	c := Collector{
+		colly.NewCollector(
+			// Allow revisiting the base URL to fetch books from the current page and retrieve URLs of
+			// other pages.
+			// TODO: Enhance by reusing the base URL HTML for fetching of books and other pages
+			colly.AllowURLRevisit(),
+		),
+		urls[0],
+	}
 
 	// Set headers
 	c.OnRequest(func(r *colly.Request) {

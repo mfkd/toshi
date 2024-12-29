@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/pflag"
 
+	"github.com/mfkd/toshi/internal/embed"
 	"github.com/mfkd/toshi/internal/lib"
 	"github.com/mfkd/toshi/internal/logger"
 	"github.com/mfkd/toshi/internal/ui"
@@ -33,7 +34,7 @@ func parseArgs() (string, bool) {
 }
 
 func Execute() {
-	c := lib.SetupCollector()
+	c := lib.SetupCollector(embed.GetUrls())
 	searchTerm, verbose := parseArgs()
 
 	if verbose {

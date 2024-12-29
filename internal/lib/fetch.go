@@ -13,7 +13,7 @@ import (
 
 // Fetch a list of books based on the search term
 // TODO: Scrape all pages in response not just page 1.
-func fetchBooks(c *colly.Collector, url string) ([]Book, error) {
+func fetchBooks(c Collector, url string) ([]Book, error) {
 	var books []Book
 
 	// Handle book rows
@@ -72,7 +72,7 @@ func isValidPage(link string) bool {
 	return re.MatchString(link)
 }
 
-func fetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
+func fetchPagesURLs(c Collector, term string) ([]string, error) {
 	var pages []string
 	uniqueLinks := make(map[string]struct{}) // Map to store unique links
 	var mu sync.Mutex
@@ -111,7 +111,7 @@ func fetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
 	})
 
 	// Build the search URL
-	searchURL := defaultSearchURL(term)
+	searchURL := defaultSearchURL(term, c.url)
 
 	// Visit the search page
 	err := c.Visit(searchURL)
@@ -124,7 +124,7 @@ func fetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
 	return pages, nil
 }
 
-func fetchBooksFromURLs(c *colly.Collector, urls []string) ([]Book, error) {
+func fetchBooksFromURLs(c Collector, urls []string) ([]Book, error) {
 	var books []Book
 	for _, page := range urls {
 		booksOnPage, err := fetchBooks(c, page)
@@ -136,9 +136,9 @@ func fetchBooksFromURLs(c *colly.Collector, urls []string) ([]Book, error) {
 	return books, nil
 }
 
-func fetchAllBooks(c *colly.Collector, term string) ([]Book, error) {
+func fetchAllBooks(c Collector, term string) ([]Book, error) {
 	// Fetch the URLs of pages
-	booksFromFirstPage, err := fetchBooks(c, defaultSearchURL(term))
+	booksFromFirstPage, err := fetchBooks(c, defaultSearchURL(term, c.url))
 	if err != nil {
 		return nil, fmt.Errorf("error fetching books from first page 1 url: %w", err)
 	}

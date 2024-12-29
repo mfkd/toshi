@@ -3,7 +3,6 @@ package lib
 import (
 	"fmt"
 
-	"github.com/gocolly/colly/v2"
 	"github.com/mfkd/toshi/internal/logger"
 )
 
@@ -12,7 +11,7 @@ type UI interface {
 }
 
 // ProcessBooks handles the user selection, fetches download links, and attempts to download the selected book.
-func ProcessBooks(c *colly.Collector, searchTerm string, ui UI) error {
+func ProcessBooks(c Collector, searchTerm string, ui UI) error {
 	books, err := fetchAllBooks(c, searchTerm)
 	if err != nil {
 		return fmt.Errorf("error fetching books from ages: %w", err)

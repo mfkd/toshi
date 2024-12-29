@@ -14,7 +14,7 @@ import (
 
 const downloadDir = "output"
 
-func setupDownloadCollector(c *colly.Collector, filename string) error {
+func setupDownloadCollector(c Collector, filename string) error {
 	outputDir := downloadDir
 	if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
@@ -49,7 +49,7 @@ func setupDownloadCollector(c *colly.Collector, filename string) error {
 	return nil
 }
 
-func tryDownloadLinks(c *colly.Collector, downloadLinks []string, filename string) error {
+func tryDownloadLinks(c Collector, downloadLinks []string, filename string) error {
 	if err := setupDownloadCollector(c, filename); err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func tryDownloadLinks(c *colly.Collector, downloadLinks []string, filename strin
 	return err
 }
 
-func downloadFile(c *colly.Collector, fileURL string) error {
+func downloadFile(c Collector, fileURL string) error {
 	err := c.Visit(fileURL)
 	if err != nil {
 		// TODO: Check if there is a way to handle this better.
@@ -81,7 +81,7 @@ func downloadFile(c *colly.Collector, fileURL string) error {
 }
 
 // fetchDownloadLinks extracts valid download links for a book from its mirror pages using a Colly collector.
-func fetchDownloadLinks(c *colly.Collector, b Book) []string {
+func fetchDownloadLinks(c Collector, b Book) []string {
 	// We need to try fetch download links from all Mirrors not just index 0
 	var downloadLinks []string
 	c.OnHTML("div#download ul li a[href]", func(e *colly.HTMLElement) {
