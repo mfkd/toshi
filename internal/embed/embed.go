@@ -1,7 +1,7 @@
 package embed
 
 import (
-	_ "embed"
+	"embed"
 	"fmt"
 	"os"
 	"strings"
@@ -9,11 +9,18 @@ import (
 	"github.com/mfkd/toshi/internal/validate"
 )
 
-//go:embed domains/domains.txt
-var domains string
+//go:embed domains/*
+var embeddedFiles embed.FS
 
 // GetUrls returns a list of URLs from domains.txt
 func GetUrls() []string {
+	data, err := embeddedFiles.ReadFile("domains/domains.txt")
+	if err != nil {
+		return []string{}
+	}
+
+	domains := string(data)
+
 	if domains == "" {
 		return []string{}
 	}
