@@ -13,6 +13,32 @@ Ensure you have Go installed, then run:
 go install github.com/mfkd/toshi
 ```
 
+## Configuration
+
+Configure `toshi` by setting either:
+
+### Runtime Environment Variable
+
+```sh
+export DOMAIN="example.com"
+```
+
+The DOMAIN value can be changed anytime without rebuilding.
+
+### Embedded domains.txt
+
+File location: `./internal/embed/domains/domains.txt`. Only a single domain is supported at the moment.
+
+```text
+example.com
+```
+
+These domains are baked into the program when you build it. You'll need to rebuild to change them.
+
+### Notes
+
+Environment variable takes priority if both are set. Domain must be valid (e.g. "example.com" not "https://example.com").
+
 ## Usage
 
 Search for the book *The Iliad* by Homer.
