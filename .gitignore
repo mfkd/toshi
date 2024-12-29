@@ -7,5 +7,5 @@ dist/
 # Output directory for file downloads
 output/
 
-# url embed directory
-urls/
+# domains to embed directory
+domains/
