@@ -6,7 +6,7 @@ import (
 	"syscall"
 
 	"github.com/fatih/color"
-	"github.com/mfkd/toshi/internal/libgen"
+	"github.com/mfkd/toshi/internal/lib"
 	"golang.org/x/term"
 )
 
@@ -20,7 +20,7 @@ func getTerminalWidth() int {
 }
 
 // Display a paginated list of books with dynamic dividers
-func displayBooksPaginated(books []libgen.Book, startIndex int) {
+func displayBooksPaginated(books []lib.Book, startIndex int) {
 	terminalWidth := getTerminalWidth()
 	endIndex := startIndex + booksPerPage
 	if endIndex > len(books) {

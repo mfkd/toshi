@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/mfkd/toshi/internal/libgen"
+	"github.com/mfkd/toshi/internal/lib"
 
 	"github.com/fatih/color"
 )
@@ -13,7 +13,7 @@ const booksPerPage = 5
 
 type CLI struct{}
 
-func (CLI) SelectBook(books []libgen.Book) *libgen.Book {
+func (CLI) SelectBook(books []lib.Book) *lib.Book {
 	startIndex := 0
 
 	for {

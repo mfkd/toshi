@@ -1,4 +1,4 @@
-package libgen
+package lib
 
 import (
 	"fmt"

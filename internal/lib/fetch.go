@@ -1,4 +1,4 @@
-package libgen
+package lib
 
 import (
 	"fmt"
@@ -31,7 +31,7 @@ func fetchBooks(c *colly.Collector, url string) ([]Book, error) {
 	// Visit the search page
 	err := c.Visit(url)
 	if err != nil {
-		return nil, fmt.Errorf("error visiting Libgen: %w", err)
+		return nil, fmt.Errorf("error visiting lib target: %w", err)
 	}
 	c.Wait()
 
@@ -116,7 +116,7 @@ func fetchPagesURLs(c *colly.Collector, term string) ([]string, error) {
 	// Visit the search page
 	err := c.Visit(searchURL)
 	if err != nil {
-		return nil, fmt.Errorf("error visiting Libgen: %w", err)
+		return nil, fmt.Errorf("error visiting lib: %w", err)
 	}
 	c.Wait()
 

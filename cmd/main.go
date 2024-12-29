@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/mfkd/toshi/internal/libgen"
+	"github.com/mfkd/toshi/internal/lib"
 	"github.com/mfkd/toshi/internal/logger"
 	"github.com/mfkd/toshi/internal/ui"
 )
@@ -33,7 +33,7 @@ func parseArgs() (string, bool) {
 }
 
 func Execute() {
-	c := libgen.SetupCollector()
+	c := lib.SetupCollector()
 	searchTerm, verbose := parseArgs()
 
 	if verbose {
@@ -41,7 +41,7 @@ func Execute() {
 		fmt.Println("DEBUG mode: Detailed logs are now enabled")
 	}
 
-	if err := libgen.ProcessBooks(c, searchTerm, ui.CLI{}); err != nil {
+	if err := lib.ProcessBooks(c, searchTerm, ui.CLI{}); err != nil {
 		logger.Errorf("Error processing books: %v", err)
 		os.Exit(1)
 	}
