@@ -11,22 +11,8 @@ import (
 	"github.com/mfkd/toshi/internal/lib"
 	"github.com/mfkd/toshi/internal/logger"
 	"github.com/mfkd/toshi/internal/ui"
+	"github.com/mfkd/toshi/internal/validate"
 )
-
-const (
-	scheme = "https://"
-	path   = "/search.php"
-)
-
-// ValidateDomain checks if the domain is valid
-func validateDomain(domain string) bool {
-	return len(domain) == 9
-}
-
-// buildURL constructs a URL from a domain
-func buildURL(domain string) string {
-	return fmt.Sprintf("%s%s%s", scheme, domain, path)
-}
 
 // parseArgs returns the search term and verbose flag
 func parseArgs() (string, bool) {
@@ -56,12 +42,12 @@ func parseEnv() string {
 		return ""
 	}
 
-	if !validateDomain(domain) {
+	if !validate.ValidateDomain(domain) {
 		fmt.Printf("Invalid domain detected in environment variable: %s", domain)
 		return ""
 	}
 
-	return buildURL(domain)
+	return validate.BuildURL(domain)
 }
 
 // selectURL returns the URL to use based on the environment variable or embedded URL.
@@ -84,7 +70,7 @@ func selectURL(env string, embed []string) string {
 func Execute() {
 	selected := selectURL(parseEnv(), embed.GetUrls())
 	if selected == "" {
-		fmt.Println("No valid URL found")
+		fmt.Println("No valid domain found")
 		fmt.Println("Please set the DOMAIN environment variable or add a valid domain to domains.txt")
 		os.Exit(1)
 	}
