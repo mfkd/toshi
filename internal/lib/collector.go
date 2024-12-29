@@ -8,7 +8,7 @@ type Collector struct {
 }
 
 // SetupCollector initializes and returns a configured collector.
-func SetupCollector(urls []string) Collector {
+func SetupCollector(url string) Collector {
 	// Create a custom collector
 	c := Collector{
 		colly.NewCollector(
@@ -17,9 +17,7 @@ func SetupCollector(urls []string) Collector {
 			// TODO: Enhance by reusing the base URL HTML for fetching of books and other pages
 			colly.AllowURLRevisit(),
 		),
-		// TODO: Add support for multiple URLs to improve reliability in the event of server
-		// outages.
-		urls[0],
+		url,
 	}
 
 	// Set headers

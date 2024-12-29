@@ -13,6 +13,22 @@ import (
 	"github.com/mfkd/toshi/internal/ui"
 )
 
+const (
+	scheme = "https://"
+	path   = "/search.php"
+)
+
+// ValidateDomain checks if the domain is valid
+func validateDomain(domain string) bool {
+	return len(domain) == 9
+}
+
+// buildURL constructs a URL from a domain
+func buildURL(domain string) string {
+	return fmt.Sprintf("%s%s%s", scheme, domain, path)
+}
+
+// parseArgs returns the search term and verbose flag
 func parseArgs() (string, bool) {
 	// Define the verbose flag
 	verbose := pflag.BoolP("verbose", "v", false, "Enable verbose output with debug logs")
@@ -33,8 +49,47 @@ func parseArgs() (string, bool) {
 	return strings.Join(args, " "), *verbose
 }
 
+// parseEnv returns the domain from the environment variable
+func parseEnv() string {
+	domain := os.Getenv("DOMAIN")
+	if domain == "" {
+		return ""
+	}
+
+	if !validateDomain(domain) {
+		fmt.Printf("Invalid domain detected in environment variable: %s", domain)
+		return ""
+	}
+
+	return buildURL(domain)
+}
+
+// selectURL returns the URL to use based on the environment variable or embedded URL.
+// Environment variable takes precedence over embedded URLs
+func selectURL(env string, embed []string) string {
+	// TODO: Add support for multiple URLs to improve reliability in the event of server
+	// outages.
+	if env != "" {
+		return env
+	}
+
+	if len(embed) == 0 {
+		return ""
+	}
+
+	return embed[0]
+}
+
+// Execute runs the CLI application
 func Execute() {
-	c := lib.SetupCollector(embed.GetUrls())
+	selected := selectURL(parseEnv(), embed.GetUrls())
+	if selected == "" {
+		fmt.Println("No valid URL found")
+		fmt.Println("Please set the DOMAIN environment variable or add a valid domain to domains.txt")
+		os.Exit(1)
+	}
+
+	c := lib.SetupCollector(selectURL(parseEnv(), embed.GetUrls()))
 	searchTerm, verbose := parseArgs()
 
 	if verbose {

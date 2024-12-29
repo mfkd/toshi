@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	scheme = "https//"
+	scheme = "https://"
 	path   = "/search.php"
 )
 
