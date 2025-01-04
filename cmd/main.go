@@ -5,8 +5,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/spf13/pflag"
-
 	"github.com/mfkd/toshi/internal/embed"
 	"github.com/mfkd/toshi/internal/lib"
 	"github.com/mfkd/toshi/internal/logger"
@@ -16,23 +14,41 @@ import (
 
 // parseArgs returns the search term and verbose flag
 func parseArgs() (string, bool) {
-	// Define the verbose flag
-	verbose := pflag.BoolP("verbose", "v", false, "Enable verbose output with debug logs")
-	pflag.Parse()
+	args := os.Args[1:]
 
-	args := pflag.Args()
+	if len(args) == 0 {
+		printUsageAndExit()
+	}
 
-	// Ensure the positional argument <searchterm> is provided
-	// TODO: Provide more informative output when user provides invalid input
-	if len(args) < 1 {
-		fmt.Println("Usage: toshi <searchterm>")
-		fmt.Println("Example: toshi The Iliad Homer")
-		fmt.Println("Flags:")
-		fmt.Println("  -v  Enable verbose output with debug logs")
+	var searchTerms []string
+	verbose := false
+
+	for _, arg := range args {
+		if arg == "-v" {
+			verbose = true
+		} else if strings.HasPrefix(arg, "-") {
+			fmt.Fprintf(os.Stderr, "Invalid flag detected: %s\n", arg)
+			os.Exit(1)
+		} else {
+			searchTerms = append(searchTerms, arg)
+		}
+	}
+
+	if len(searchTerms) == 0 {
+		fmt.Fprintln(os.Stderr, "Error: No search term provided.")
 		os.Exit(1)
 	}
 
-	return strings.Join(args, " "), *verbose
+	return strings.Join(searchTerms, " "), verbose
+}
+
+func printUsageAndExit() {
+	fmt.Fprintf(os.Stderr, `Usage: toshi <searchterm> [options]
+Example: toshi The Iliad Homer
+Options:
+  -v  Enable verbose output with debug logs
+`)
+	os.Exit(1)
 }
 
 // parseEnv returns the domain from the environment variable
@@ -78,6 +94,12 @@ func Execute() {
 	c := lib.SetupCollector(selectURL(parseEnv(), embed.GetUrls()))
 
 	searchTerm, verbose := parseArgs()
+
+	fmt.Printf("searchTerm: %s\nverbose: %t\n", searchTerm, verbose)
+
+	if true {
+		os.Exit(0)
+	}
 
 	if verbose {
 		logger.Configure(logger.LevelDebug, nil)
