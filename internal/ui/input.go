@@ -5,8 +5,6 @@ import (
 	"strconv"
 
 	"github.com/mfkd/toshi/internal/lib"
-
-	"github.com/fatih/color"
 )
 
 const booksPerPage = 5
@@ -19,23 +17,26 @@ func (CLI) SelectBook(books []lib.Book) *lib.Book {
 	for {
 		displayBooksPaginated(books, startIndex)
 
-		color.New(color.FgYellow).Printf("\nOptions:\n")
+		// Print options
+		fmt.Printf("\n%sOptions:%s\n", FgYellow, Reset)
 		fmt.Println("Enter the number of the book to select it.")
 		if startIndex > 0 {
-			color.New(color.FgMagenta).Println("Enter 'p' for Previous page.")
+			fmt.Printf("%sEnter 'p' for Previous page.%s\n", FgMagenta, Reset)
 		}
 		if startIndex+booksPerPage < len(books) {
-			color.New(color.FgMagenta).Println("Enter 'n' for Next page.")
+			fmt.Printf("%sEnter 'n' for Next page.%s\n", FgMagenta, Reset)
 		}
-		color.New(color.FgRed).Println("Enter 'q' to Quit.")
+		fmt.Printf("%sEnter 'q' to Quit.%s\n", FgRed, Reset)
 		fmt.Print("Your choice: ")
 
+		// Read user input
 		var input string
 		if _, err := fmt.Scanln(&input); err != nil {
-			color.New(color.FgRed).Println("Error reading input. Please try again.")
+			fmt.Printf("%sError reading input. Please try again.%s\n", FgRed, Reset)
 			continue
 		}
 
+		// Handle input
 		if input == "n" && startIndex+booksPerPage < len(books) {
 			startIndex += booksPerPage
 		} else if input == "p" && startIndex > 0 {
@@ -47,7 +48,7 @@ func (CLI) SelectBook(books []lib.Book) *lib.Book {
 			if err == nil && selection > 0 && selection <= len(books) {
 				return &books[selection-1]
 			}
-			color.New(color.FgRed).Println("Invalid input. Please try again.")
+			fmt.Printf("%sInvalid input. Please try again.%s\n", FgRed, Reset)
 		}
 	}
 }
