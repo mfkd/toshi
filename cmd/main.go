@@ -95,12 +95,6 @@ func Execute() {
 
 	searchTerm, verbose := parseArgs()
 
-	fmt.Printf("searchTerm: %s\nverbose: %t\n", searchTerm, verbose)
-
-	if true {
-		os.Exit(0)
-	}
-
 	if verbose {
 		logger.Configure(logger.LevelDebug, nil)
 		fmt.Println("DEBUG mode: Detailed logs are now enabled")
