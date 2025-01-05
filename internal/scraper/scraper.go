@@ -3,7 +3,11 @@ package scraper
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
+	"net/url"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -73,4 +77,54 @@ func (s *Scraper) CheckHead(url string) (int, error) {
 	defer resp.Body.Close()
 
 	return resp.StatusCode, nil
+}
+
+// DownloadFile downloads a file from the given URL and saves it to the download directory.
+func (s *Scraper) DownloadFile(filename, downloadURL, downloadDir string) error {
+	// Check if the URL is valid
+	_, err := url.ParseRequestURI(downloadURL)
+	if err != nil {
+		return fmt.Errorf("invalid URL: %w", err)
+	}
+
+	outputDir := downloadDir
+	if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
+	}
+
+	filePath := filepath.Join(outputDir, filename)
+	// Create the file
+	out, err := os.Create(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to create file: %w", err)
+	}
+	defer out.Close()
+
+	// Create a request with context
+	ctx := context.Background()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("User-Agent", s.UserAgent)
+
+	// Get the data
+	resp, err := s.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to get file: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Check server response
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("bad status: %s", resp.Status)
+	}
+
+	// Write the body to file
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to write file: %w", err)
+	}
+
+	return err
 }

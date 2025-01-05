@@ -12,7 +12,7 @@ type UI interface {
 }
 
 // ProcessBooks handles the user selection, fetches download links, and attempts to download the selected book.
-func ProcessBooks(c Collector, s *scraper.Scraper, searchTerm string, ui UI) error {
+func ProcessBooks(s *scraper.Scraper, searchTerm string, ui UI) error {
 	books, err := fetchAllBooks(s, searchTerm)
 	if err != nil {
 		return fmt.Errorf("error fetching books from ages: %w", err)
@@ -29,14 +29,13 @@ func ProcessBooks(c Collector, s *scraper.Scraper, searchTerm string, ui UI) err
 	fmt.Printf("Selected Book: %s\n", selectedBook.Title)
 
 	// Fetch download links for the selected book
-	downloadLinks := fetchDownloadLinks(c, *selectedBook)
+	downloadLinks := fetchDownloadLinks(s, *selectedBook)
 
-	// Attempt to download the file
 	fileName := fileName(*selectedBook)
 	logger.Debugf("Attempting to download book to: %s\n", fileName)
 
 	// Attempt to download the file
-	if err := tryDownloadLinks(c, downloadLinks, fileName); err != nil {
+	if err := tryDownloadLinks(s, downloadLinks, fileName); err != nil {
 		logger.Errorf("Failed to download file for book %s: %v", selectedBook.Title, err)
 		return fmt.Errorf("failed to download book: %w", err)
 	}
