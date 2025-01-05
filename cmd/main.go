@@ -8,6 +8,7 @@ import (
 	"github.com/mfkd/toshi/internal/embed"
 	"github.com/mfkd/toshi/internal/lib"
 	"github.com/mfkd/toshi/internal/logger"
+	"github.com/mfkd/toshi/internal/scraper"
 	"github.com/mfkd/toshi/internal/ui"
 	"github.com/mfkd/toshi/internal/validate"
 )
@@ -91,6 +92,7 @@ func Execute() {
 		os.Exit(1)
 	}
 
+	s := scraper.NewScraper(selectURL(parseEnv(), embed.GetUrls()))
 	c := lib.SetupCollector(selectURL(parseEnv(), embed.GetUrls()))
 
 	searchTerm, verbose := parseArgs()
@@ -100,7 +102,7 @@ func Execute() {
 		fmt.Println("DEBUG mode: Detailed logs are now enabled")
 	}
 
-	if err := lib.ProcessBooks(c, searchTerm, ui.CLI{}); err != nil {
+	if err := lib.ProcessBooks(c, s, searchTerm, ui.CLI{}); err != nil {
 		logger.Errorf("Error processing books: %v", err)
 		os.Exit(1)
 	}

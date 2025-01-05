@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mfkd/toshi/internal/logger"
+	"github.com/mfkd/toshi/internal/scraper"
 )
 
 type UI interface {
@@ -11,8 +12,8 @@ type UI interface {
 }
 
 // ProcessBooks handles the user selection, fetches download links, and attempts to download the selected book.
-func ProcessBooks(c Collector, searchTerm string, ui UI) error {
-	books, err := fetchAllBooks(c, searchTerm)
+func ProcessBooks(c Collector, s *scraper.Scraper, searchTerm string, ui UI) error {
+	books, err := fetchAllBooks(s, searchTerm)
 	if err != nil {
 		return fmt.Errorf("error fetching books from ages: %w", err)
 	}
