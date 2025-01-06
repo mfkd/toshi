@@ -15,7 +15,7 @@ type UI interface {
 func ProcessBooks(s *scraper.Scraper, searchTerm string, ui UI) error {
 	books, err := fetchAllBooks(s, searchTerm)
 	if err != nil {
-		return fmt.Errorf("error fetching books from ages: %w", err)
+		return fmt.Errorf("error fetching books from pages: %w", err)
 	}
 
 	// Allow the user to select a book from the filtered list (e.g., EPUB books)
