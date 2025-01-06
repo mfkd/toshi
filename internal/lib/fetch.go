@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -11,8 +12,8 @@ import (
 	"github.com/mfkd/toshi/internal/scraper"
 )
 
-func fetchBooks(s *scraper.Scraper, url string) ([]Book, error) {
-	doc, err := s.Scrape(url)
+func fetchBooks(ctx context.Context, s *scraper.Scraper, url string) ([]Book, error) {
+	doc, err := s.ScrapeWithContext(ctx, url)
 	if err != nil {
 		return nil, fmt.Errorf("error scraping lib: %w", err)
 	}
@@ -51,12 +52,12 @@ func fetchBooks(s *scraper.Scraper, url string) ([]Book, error) {
 	return books, nil
 }
 
-func fetchPagesURLs(s *scraper.Scraper, term string) ([]string, error) {
+func fetchPagesURLs(ctx context.Context, s *scraper.Scraper, term string) ([]string, error) {
 	var pages []string
 
 	firstPage := pageURL(s.URL, term, 1)
 
-	doc, err := s.Scrape(firstPage)
+	doc, err := s.ScrapeWithContext(ctx, firstPage)
 	if err != nil {
 		return nil, fmt.Errorf("error scraping lib: %w", err)
 	}
@@ -108,16 +109,16 @@ func totalPages(content string) (int, error) {
 	return totalPages, nil
 }
 
-func fetchAllBooks(s *scraper.Scraper, term string) ([]Book, error) {
+func fetchAllBooks(ctx context.Context, s *scraper.Scraper, term string) ([]Book, error) {
 	var books []Book
 
-	pages, err := fetchPagesURLs(s, term)
+	pages, err := fetchPagesURLs(ctx, s, term)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching page URLS: %w", err)
 	}
 
 	for _, page := range pages {
-		booksOnPage, err := fetchBooks(s, page)
+		booksOnPage, err := fetchBooks(ctx, s, page)
 		if err != nil {
 			return nil, fmt.Errorf("error fetching books from page: %w", err)
 		}

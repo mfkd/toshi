@@ -31,9 +31,13 @@ func NewScraper(url string) *Scraper {
 	}
 }
 
-// Scrapes the given URL and returns the document.
+// Scrape sends a GET request to the given URL and returns the document.
 func (s *Scraper) Scrape(url string) (*goquery.Document, error) {
-	ctx := context.Background()
+	return s.ScrapeWithContext(context.Background(), url)
+}
+
+// ScrapeWithContext sends a GET request to the given URL and returns the document with context.
+func (s *Scraper) ScrapeWithContext(ctx context.Context, url string) (*goquery.Document, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %w", err)
@@ -61,9 +65,8 @@ func (s *Scraper) Scrape(url string) (*goquery.Document, error) {
 }
 
 // CheckHead sends a HEAD request to the given URL and returns the status code.
-func (s *Scraper) CheckHead(url string) (int, error) {
-	ctx := context.Background()
-	req, err := http.NewRequestWithContext(ctx, "HEAD", url, nil)
+func (s *Scraper) CheckHead(ctx context.Context, url string) (int, error) {
+	req, err := http.NewRequestWithContext(context.Background(), "HEAD", url, nil)
 	if err != nil {
 		return 0, fmt.Errorf("error creating request: %w", err)
 	}
@@ -80,8 +83,9 @@ func (s *Scraper) CheckHead(url string) (int, error) {
 }
 
 // DownloadFile downloads a file from the given URL and saves it to the download directory.
-func (s *Scraper) DownloadFile(filename, downloadURL, downloadDir string) error {
-	// Check if the URL is valid
+func (s *Scraper) DownloadFile(ctx context.Context, filename, downloadURL, downloadDir string) error {
+	// Check if the URL is valid.
+	// TODO: Could we handle this when fetching the download links?
 	_, err := url.ParseRequestURI(downloadURL)
 	if err != nil {
 		return fmt.Errorf("invalid URL: %w", err)
@@ -101,7 +105,6 @@ func (s *Scraper) DownloadFile(filename, downloadURL, downloadDir string) error 
 	defer out.Close()
 
 	// Create a request with context
-	ctx := context.Background()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
