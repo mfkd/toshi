@@ -37,6 +37,7 @@ func fetchDownloadLinks(ctx context.Context, s *scraper.Scraper, b Book) []strin
 	doc.Find("div#download ul li a[href]").Each(func(i int, s *goquery.Selection) {
 		href, exists := s.Attr("href")
 		if exists {
+			// TODO: Make this more robust.
 			if strings.Contains(href, "."+strings.TrimSpace(b.Extension)) {
 				downloadLinks = append(downloadLinks, href)
 			}
