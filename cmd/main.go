@@ -70,8 +70,8 @@ func parseEnv() string {
 // selectURL returns the URL to use based on the environment variable or embedded URL.
 // Environment variable takes precedence over embedded URLs
 func selectURL(env string, embed []string) string {
-	// TODO: Add support for multiple URLs to improve reliability in the event of server
-	// outages.
+	// TODO: Add support for multiple domains to improve reliability in the event of domain
+	// resolution issues.
 	if env != "" {
 		return env
 	}
