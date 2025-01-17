@@ -84,50 +84,43 @@ func (s *Scraper) CheckHead(ctx context.Context, url string) (int, error) {
 
 // DownloadFile downloads a file from the given URL and saves it to the download directory.
 func (s *Scraper) DownloadFile(ctx context.Context, filename, downloadURL, downloadDir string) error {
-	// Check if the URL is valid.
-	// TODO: Could we handle this when fetching the download links?
-	_, err := url.ParseRequestURI(downloadURL)
-	if err != nil {
+	// Validate the URL
+	if _, err := url.ParseRequestURI(downloadURL); err != nil {
 		return fmt.Errorf("invalid URL: %w", err)
 	}
 
-	outputDir := downloadDir
-	if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
+	// Create download directory if it doesn't exist
+	if err := os.MkdirAll(downloadDir, os.ModePerm); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
-	filePath := filepath.Join(outputDir, filename)
-	// Create the file
-	out, err := os.Create(filePath)
-	if err != nil {
-		return fmt.Errorf("failed to create file: %w", err)
-	}
-	defer out.Close()
-
-	// Create a request with context
+	// Create new HTTP GET request
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 	req.Header.Set("User-Agent", s.UserAgent)
 
-	// Get the data
+	// Send the request
 	resp, err := s.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to get file: %w", err)
 	}
 	defer resp.Body.Close()
 
-	// Check server response
+	// Check if request was successful
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("bad status: %s", resp.Status)
 	}
 
-	// Write the body to file
-	_, err = io.Copy(out, resp.Body)
+	// Create output file
+	out, err := os.Create(filepath.Join(downloadDir, filename))
 	if err != nil {
-		return fmt.Errorf("failed to write file: %w", err)
+		return fmt.Errorf("failed to create file: %w", err)
 	}
+	defer out.Close()
 
+	// Copy response body to file
+	_, err = io.Copy(out, resp.Body)
 	return err
 }
