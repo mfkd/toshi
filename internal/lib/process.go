@@ -41,7 +41,10 @@ func ProcessBooks(s *scraper.Scraper, searchTerm string, ui UI) error {
 	defer cancel()
 
 	// Fetch download links for the selected book
-	downloadLinks := fetchDownloadLinks(ctx, s, *selectedBook)
+	downloadLinks, err := fetchDownloadLinks(ctx, s, *selectedBook)
+	if err != nil {
+		return fmt.Errorf("failed to fetch download links: %w", err)
+	}
 
 	fileName := fileName(*selectedBook)
 	logger.Debugf("Attempting to download book to: %s\n", fileName)

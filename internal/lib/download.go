@@ -24,14 +24,13 @@ func tryDownloadLinks(ctx context.Context, s *scraper.Scraper, downloadLinks []s
 	return err
 }
 
-func fetchDownloadLinks(ctx context.Context, s *scraper.Scraper, b Book) []string {
+func fetchDownloadLinks(ctx context.Context, s *scraper.Scraper, b Book) ([]string, error) {
 	var downloadLinks []string
 
 	// TODO: Handle multiple mirrors
 	doc, err := s.ScrapeWithContext(ctx, b.Mirrors[0])
 	if err != nil {
-		logger.Errorf("Error scraping download links: %v", err)
-		return downloadLinks
+		return nil, err
 	}
 
 	doc.Find("div#download ul li a[href]").Each(func(i int, s *goquery.Selection) {
@@ -48,5 +47,5 @@ func fetchDownloadLinks(ctx context.Context, s *scraper.Scraper, b Book) []strin
 		logger.Errorf("No download links found for book: %s", b.Title)
 	}
 
-	return downloadLinks
+	return downloadLinks, nil
 }

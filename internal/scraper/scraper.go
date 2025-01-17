@@ -52,7 +52,7 @@ func (s *Scraper) ScrapeWithContext(ctx context.Context, url string) (*goquery.D
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		return nil, fmt.Errorf("HTTP request failed with status %d (%s) for URL: %s", resp.StatusCode, resp.Status, url)
 	}
 
 	// load html document
