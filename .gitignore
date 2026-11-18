@@ -7,5 +7,5 @@ dist/
 # Output directory for file downloads
 output/
 
-# domains to embed directory
-domains/
+# Legacy local build configuration
+/internal/embed/domains/domains.txt

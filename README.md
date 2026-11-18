@@ -7,37 +7,27 @@ Toshi is a command-line tool designed for searching books.
 
 ## Installation
 
-Ensure you have Go installed, then run:
+Install the latest tagged release with Go:
 
 ```sh
-go install github.com/mfkd/toshi
+go install github.com/mfkd/toshi@latest
 ```
+
+To build and update `toshi` from a local checkout, run `go install .` from the
+repository root.
 
 ## Configuration
 
-Configure `toshi` by setting either:
-
-### Runtime Environment Variable
+The default catalog is `libgen.bz`. Set `DOMAIN` to override it:
 
 ```sh
-export DOMAIN="example.com"
+export DOMAIN="libgen.bz,libgen.vg"
 ```
 
-The DOMAIN value can be changed anytime without rebuilding.
-
-### Embedded domains.txt
-
-File location: `./internal/embed/domains/domains.txt`. Only a single domain is supported at the moment.
-
-```text
-example.com
-```
-
-These domains are baked into the program when you build it. You'll need to rebuild to change them.
-
-### Notes
-
-Environment variable takes priority if both are set. Domain must be valid (e.g. "example.com" not "https://example.com").
+Use hostnames without a scheme or path. Toshi tries the comma-separated
+sources in order until it finds EPUB results. Toshi uses `/index.php` for
+`libgen.bz`, `libgen.gl`, `libgen.la`, `libgen.li`, and `libgen.vg`.
+Other hostnames use the legacy `/search.php` catalog.
 
 ## Usage
 
@@ -46,6 +36,10 @@ Search for the book *The Iliad* by Homer.
 ```sh
 toshi The Iliad Homer
 ```
+
+Select an EPUB by number. Toshi saves the download in `output/` under the
+current working directory. If the filename already exists, Toshi adds a
+numbered suffix. Use `-v` for diagnostics and `--help` for usage.
 
 ## Disclaimer
 

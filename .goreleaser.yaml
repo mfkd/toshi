@@ -3,16 +3,10 @@
 
 version: 2
 
-# Pre-build hooks
-before:
-  hooks:
-    - go mod tidy
-    - go generate ./...
-
 # Build configuration
 builds:
   - id: toshi
-    main: main.go
+    main: .
     binary: toshi
     env:
       - CGO_ENABLED=0
@@ -26,14 +20,12 @@ builds:
 # Archive configuration
 archives:
   - id: toshi-archive
-    format: tar.gz
+    formats: [tar.gz]
     name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
       {{- if eq .Arch "amd64" }}x86_64
-      {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
-      {{- if .Arm }}v{{ .Arm }}{{ end }}
     files:
       - README.md
 
